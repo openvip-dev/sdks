@@ -43,18 +43,26 @@ class Client:
 
     # --- Speech ---
 
-    def speak(self, text: str, *, language: str | None = None) -> SpeechResponse:
+    def speak(
+        self, text: str, *, language: str | None = None, **kwargs: Any
+    ) -> SpeechResponse:
         """Request text-to-speech synthesis.
 
         Args:
             text: Text to speak.
             language: BCP 47 language tag (e.g. "en", "it").
+            **kwargs: Platform-specific extensions (e.g. engine, voice, speed).
+                These are passed through to the server but are not part of the
+                OpenVIP protocol specification.
 
         Returns:
             SpeechResponse with status and duration_ms.
         """
         req = create_speech_request(text, language=language)
-        data = self._post("/speech", req.to_dict())
+        body = req.to_dict()
+        if kwargs:
+            body.update(kwargs)
+        data = self._post("/speech", body)
         return SpeechResponse.from_dict(data)
 
     # --- Status ---
