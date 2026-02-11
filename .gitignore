@@ -1,15 +1,12 @@
-# Generated SDKs (regenerate with ./generate.sh)
-python/
-dotnet/
-typescript/
-go/
-rust/
-swift/
-kotlin/
-java/
-
 # Temp files
 .openapi-spec.yaml
 *.pyc
 __pycache__/
 .DS_Store
+node_modules/
+
+# Future SDKs (uncomment when generated)
+rust/
+swift/
+kotlin/
+java/

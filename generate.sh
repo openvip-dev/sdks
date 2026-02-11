@@ -99,10 +99,10 @@ echo "=== GENERATING SDKs ==="
 
 generate "python" "python" "openvip"
 generate "dotnet" "csharp" "OpenVip"
+generate "typescript" "typescript-fetch" "openvip" "--additional-properties=npmName=openvip"
+generate "go" "go" "openvip"
 
 # Future SDKs (uncomment as needed)
-# generate "typescript" "typescript-fetch" "openvip" "--additional-properties=npmName=openvip"
-# generate "go" "go" "openvip"
 # generate "rust" "rust" "openvip"
 # generate "swift" "swift6" "OpenVip" "--additional-properties=projectName=OpenVip"
 # generate "kotlin" "kotlin" "org.openvip"

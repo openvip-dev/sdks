@@ -1,0 +1,412 @@
+openapi: 3.1.0
+info:
+  contact:
+    name: OpenVIP
+    url: https://openvip.org
+  description: |
+    Open Voice Interaction Protocol (OpenVIP) HTTP API specification.
+
+    This API allows applications to send and receive voice interaction messages.
+
+    ## Quick Start
+
+    ```bash
+    # Subscribe to messages (SSE) — this IS the registration
+    curl http://localhost:8770/agents/my-agent-id/messages
+
+    # Send a message to an agent
+    curl -X POST http://localhost:8770/agents/my-agent-id/messages \
+      -H "Content-Type: application/json" \
+      -d '{"openvip": "1.0", "type": "transcription", "id": "uuid", "timestamp": "2026-02-06T10:30:00Z", "text": "hello"}'
+
+    # Text-to-speech
+    curl -X POST http://localhost:8770/speech \
+      -H "Content-Type: application/json" \
+      -d '{"openvip": "1.0", "type": "speech", "text": "hello world", "language": "en"}'
+    ```
+
+    ## Agent Lifecycle
+
+    Agents are **ephemeral**. An agent exists only while its SSE connection is open.
+    No explicit registration is needed — connecting to the SSE endpoint registers the agent.
+    Disconnecting automatically de-registers it.
+  license:
+    name: CC BY 4.0
+    url: https://creativecommons.org/licenses/by/4.0/
+  title: OpenVIP API
+  version: "1.0"
+servers:
+- description: Local development server
+  url: http://localhost:8770
+tags:
+- description: Send and receive voice interaction messages
+  name: Messages
+- description: Text-to-speech operations
+  name: Speech
+- description: Engine status and monitoring
+  name: Status
+- description: Engine control commands
+  name: Control
+paths:
+  /agents/{agent_id}/messages:
+    get:
+      description: |
+        Server-Sent Events stream for messages to this agent.
+
+        The SSE connection acts as agent registration — the agent exists
+        as long as this connection is open. When the client disconnects,
+        the agent is automatically de-registered.
+
+        Reconnect on disconnect. Messages sent while disconnected are lost
+        (ephemeral model).
+
+        Keepalive comments (`: keepalive`) are sent every 30 seconds if no data.
+      operationId: subscribeAgent
+      parameters:
+      - description: Agent identifier
+        explode: false
+        in: path
+        name: agent_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            text/event-stream:
+              example: |
+                data: {"openvip":"1.0","type":"transcription","id":"...","text":"hello"}
+              schema:
+                type: string
+          description: SSE stream established
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Agent ID already connected
+      summary: Subscribe to agent messages (SSE)
+      tags:
+      - Messages
+    post:
+      description: |
+        Send a voice interaction message to a specific agent.
+        The agent must be connected via SSE (GET endpoint) to receive messages.
+      operationId: sendMessage
+      parameters:
+      - description: Agent identifier
+        explode: false
+        in: path
+        name: agent_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            example:
+              openvip: "1.0"
+              type: transcription
+              id: 550e8400-e29b-41d4-a716-446655440000
+              timestamp: 2026-02-06T10:30:00Z
+              text: turn on the light
+              language: en
+            schema:
+              $ref: "#/components/schemas/Transcription"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ack"
+          description: Message delivered
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Invalid message format
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Agent not connected
+      summary: Send message to agent
+      tags:
+      - Messages
+  /speech:
+    post:
+      description: |
+        Request text-to-speech synthesis. The engine will speak the provided text.
+      operationId: textToSpeech
+      requestBody:
+        content:
+          application/json:
+            example:
+              openvip: "1.0"
+              type: speech
+              text: Light turned on
+              language: en
+            schema:
+              $ref: "#/components/schemas/SpeechRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SpeechResponse"
+          description: Speech synthesis completed
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Invalid request
+      summary: Text-to-speech request
+      tags:
+      - Speech
+  /status:
+    get:
+      description: |
+        Get the current status of the engine. Returns protocol-level information
+        (connected agents, protocol version) and implementation-specific details
+        in the `platform` object.
+      operationId: getStatus
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Status"
+          description: Engine status
+      summary: Get engine status
+      tags:
+      - Status
+  /control:
+    post:
+      description: |
+        Send a control command to the engine.
+
+        Available commands:
+        - `stt.start` — Start speech-to-text
+        - `stt.stop` — Stop speech-to-text
+        - `engine.shutdown` — Graceful shutdown
+      operationId: sendControl
+      requestBody:
+        content:
+          application/json:
+            example:
+              command: stt.stop
+            schema:
+              $ref: "#/components/schemas/ControlRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ack"
+          description: Command executed
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Invalid command
+      summary: Send control command
+      tags:
+      - Control
+components:
+  schemas:
+    Transcription:
+      additionalProperties: true
+      description: Voice transcription message
+      example:
+        trace_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        openvip: "1.0"
+        parent_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        origin: voxtype/3.0.0
+        confidence: 0.08008281904610115
+        language: en
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        text: turn on the light
+        type: transcription
+        partial: true
+        timestamp: 2000-01-23T04:56:07.000+00:00
+      properties:
+        openvip:
+          description: Protocol version
+          example: "1.0"
+          type: string
+        type:
+          description: Message type
+          enum:
+          - transcription
+          type: string
+        id:
+          description: Unique message identifier
+          format: uuid
+          type: string
+        timestamp:
+          description: ISO 8601 timestamp
+          format: date-time
+          type: string
+        text:
+          description: Transcribed text
+          example: turn on the light
+          type: string
+        origin:
+          description: Producer identifier
+          example: voxtype/3.0.0
+          type: string
+        language:
+          description: BCP 47 language tag
+          example: en
+          pattern: "^[a-z]{2}(-[A-Z]{2})?$"
+          type: string
+        confidence:
+          description: Transcription confidence score
+          maximum: 1
+          minimum: 0
+          type: number
+        partial:
+          description: "If true, this is an incomplete transcription in progress"
+          type: boolean
+        trace_id:
+          description: ID of the original message (OpenTelemetry-style)
+          format: uuid
+          type: string
+        parent_id:
+          description: ID of the parent message (OpenTelemetry-style)
+          format: uuid
+          type: string
+      required:
+      - id
+      - openvip
+      - text
+      - timestamp
+      - type
+    SpeechRequest:
+      description: Text-to-speech request
+      example:
+        openvip: "1.0"
+        language: en
+        text: Light turned on
+        type: speech
+      properties:
+        openvip:
+          description: Protocol version
+          example: "1.0"
+          type: string
+        type:
+          description: Message type
+          enum:
+          - speech
+          type: string
+        text:
+          description: Text to synthesize
+          example: Light turned on
+          type: string
+        language:
+          description: BCP 47 language tag
+          example: en
+          pattern: "^[a-z]{2}(-[A-Z]{2})?$"
+          type: string
+      required:
+      - openvip
+      - text
+      - type
+    SpeechResponse:
+      description: Speech synthesis response
+      example:
+        duration_ms: 0
+        status: ok
+      properties:
+        status:
+          enum:
+          - ok
+          type: string
+        duration_ms:
+          description: Duration of the synthesized audio in milliseconds
+          type: integer
+      required:
+      - status
+    Status:
+      description: Engine status
+      example:
+        protocol_version: "1.0"
+        connected_agents:
+        - connected_agents
+        - connected_agents
+        platform:
+          key: ""
+      properties:
+        protocol_version:
+          description: Supported OpenVIP protocol version
+          example: "1.0"
+          type: string
+        connected_agents:
+          description: List of connected agent identifiers
+          items:
+            type: string
+          type: array
+        platform:
+          additionalProperties: true
+          description: Implementation-specific details (opaque to protocol)
+          type: object
+    ControlRequest:
+      description: Control command request
+      example:
+        command: stt.start
+      properties:
+        command:
+          description: Command to execute
+          enum:
+          - stt.start
+          - stt.stop
+          - engine.shutdown
+          type: string
+      required:
+      - command
+    Ack:
+      description: Acknowledgment response
+      example:
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        status: ok
+      properties:
+        status:
+          description: Acknowledgment status
+          enum:
+          - ok
+          type: string
+        id:
+          description: Message ID (when applicable)
+          format: uuid
+          type: string
+      required:
+      - status
+    Error:
+      description: Error response
+      example:
+        code: INVALID_FORMAT
+        error: error
+      properties:
+        error:
+          description: Human-readable error message
+          type: string
+        code:
+          description: Machine-readable error code
+          enum:
+          - INVALID_FORMAT
+          - MISSING_FIELD
+          - NOT_FOUND
+          - CONFLICT
+          - INTERNAL_ERROR
+          type: string
+      required:
+      - error
