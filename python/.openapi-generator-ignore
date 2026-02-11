@@ -26,3 +26,4 @@
 openvip/__init__.py
 openvip/client.py
 openvip/messages.py
+tests/**

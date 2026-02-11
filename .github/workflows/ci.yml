@@ -8,7 +8,7 @@ on:
 
 jobs:
   python:
-    name: "Python — install + import"
+    name: "Python — test"
     runs-on: [self-hosted, Linux, X64]
     steps:
       - uses: actions/checkout@v4
@@ -16,13 +16,15 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v4
 
-      - name: Install and verify
+      - name: Install and test
         run: |
           cd python
           uv venv --python 3.11 .venv
           . .venv/bin/activate
           uv pip install -e .
+          uv pip install pytest
           python -c "from openvip import Client, create_transcription, Status; print('OK')"
+          pytest tests/ -v
 
   python-macos:
     name: "Python — macOS ARM64"
@@ -33,13 +35,14 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v4
 
-      - name: Install and verify
+      - name: Install and test
         run: |
           cd python
           uv venv --python 3.11 .venv
           . .venv/bin/activate
           uv pip install -e .
-          python -c "from openvip import Client, create_transcription, Status; print('OK')"
+          uv pip install pytest
+          pytest tests/ -v
 
   typescript:
     name: "TypeScript — build"
