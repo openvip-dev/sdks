@@ -1,6 +1,6 @@
 [project]
 name = "openvip"
-version = "1.0.0"
+version = "1.0.1"
 description = "Python SDK for the OpenVIP voice interaction protocol"
 authors = [
   {name = "dragfly"},

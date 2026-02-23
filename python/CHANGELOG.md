@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.1] - 2026-02-23
+
+### Fixed
+- `SSE HTTP 401` no longer logged at WARNING level; downgraded to DEBUG since
+  401s are handled gracefully via the `on_disconnect` callback (token refresh).
+
 ## [1.0.0] - 2026-02-23
 
 ### Added
