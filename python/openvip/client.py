@@ -304,8 +304,11 @@ class Client:
                 if e.code == 409:
                     msg = conflict_message or f"SSE conflict (409) for {url}"
                     raise DuplicateAgentError(msg) from e
-                # Other HTTP errors
-                logger.warning("SSE HTTP %d for %s", e.code, url)
+                # Other HTTP errors — 401 is handled gracefully in on_disconnect
+                if e.code == 401:
+                    logger.debug("SSE HTTP %d for %s (refreshing token)", e.code, url)
+                else:
+                    logger.warning("SSE HTTP %d for %s", e.code, url)
                 if on_disconnect:
                     on_disconnect(e)
                 if not reconnect:
