@@ -1,9 +1,12 @@
 """Tests for hand-written Client wrapper."""
 
 import json
-from unittest.mock import MagicMock, patch
+import urllib.error
+from unittest.mock import MagicMock, call, patch
 
-from openvip import Client
+import pytest
+
+from openvip import Client, DuplicateAgentError
 from openvip.messages import PROTOCOL_VERSION, create_transcription
 from openvip.models.ack import Ack
 from openvip.models.speech_response import SpeechResponse
@@ -223,3 +226,181 @@ class TestClientSubscribe:
 
         assert len(messages) == 1
         assert messages[0].text == "ok"
+
+    @patch("openvip.client.urllib.request.urlopen")
+    def test_subscribe_raises_duplicate_agent_on_409(self, mock_urlopen):
+        mock_urlopen.side_effect = urllib.error.HTTPError(
+            url="http://test:8770/agents/my-agent/messages",
+            code=409,
+            msg="Conflict",
+            hdrs=None,
+            fp=None,
+        )
+        client = Client("http://test:8770")
+
+        with pytest.raises(DuplicateAgentError, match="already connected"):
+            list(client.subscribe("my-agent"))
+
+    @patch("openvip.client.urllib.request.urlopen")
+    def test_subscribe_calls_on_connect(self, mock_urlopen):
+        valid_id = "550e8400-e29b-41d4-a716-446655440000"
+        lines = [
+            f'data: {{"openvip":"1.0","type":"transcription","id":"{valid_id}","timestamp":"2026-01-01T00:00:00Z","text":"hi"}}\n'.encode(),
+        ]
+        mock_urlopen.return_value = _FakeSSEResponse(lines)
+
+        callback = MagicMock()
+        client = Client("http://test:8770")
+        list(client.subscribe("my-agent", on_connect=callback))
+
+        callback.assert_called_once()
+
+    @patch("openvip.client.urllib.request.urlopen")
+    def test_subscribe_calls_on_disconnect(self, mock_urlopen):
+        mock_urlopen.return_value = _FakeSSEResponse([])  # Empty stream
+
+        callback = MagicMock()
+        client = Client("http://test:8770")
+        list(client.subscribe("my-agent", on_disconnect=callback))
+
+        callback.assert_called_once_with(None)
+
+    @patch("openvip.client.time.sleep")
+    @patch("openvip.client.urllib.request.urlopen")
+    def test_subscribe_reconnect_on_connection_error(self, mock_urlopen, mock_sleep):
+        valid_id = "550e8400-e29b-41d4-a716-446655440000"
+        lines = [
+            f'data: {{"openvip":"1.0","type":"transcription","id":"{valid_id}","timestamp":"2026-01-01T00:00:00Z","text":"recovered"}}\n'.encode(),
+        ]
+        # First call fails, second succeeds
+        mock_urlopen.side_effect = [
+            ConnectionRefusedError("refused"),
+            _FakeSSEResponse(lines),
+        ]
+        got_message = False
+
+        def stop_after_message():
+            return got_message
+
+        client = Client("http://test:8770")
+        messages = []
+        for msg in client.subscribe("my-agent", reconnect=True, stop=stop_after_message):
+            messages.append(msg)
+            got_message = True
+
+        assert len(messages) == 1
+        assert messages[0].text == "recovered"
+        mock_sleep.assert_called_once_with(0.5)
+
+    @patch("openvip.client.time.sleep")
+    @patch("openvip.client.urllib.request.urlopen")
+    def test_subscribe_reconnect_exponential_backoff(self, mock_urlopen, mock_sleep):
+        valid_id = "550e8400-e29b-41d4-a716-446655440000"
+        lines = [
+            f'data: {{"openvip":"1.0","type":"transcription","id":"{valid_id}","timestamp":"2026-01-01T00:00:00Z","text":"ok"}}\n'.encode(),
+        ]
+        # Three failures then success
+        mock_urlopen.side_effect = [
+            ConnectionRefusedError("refused"),
+            ConnectionRefusedError("refused"),
+            ConnectionRefusedError("refused"),
+            _FakeSSEResponse(lines),
+        ]
+        got_message = False
+
+        def stop_after_message():
+            return got_message
+
+        client = Client("http://test:8770")
+        for msg in client.subscribe("my-agent", reconnect=True, stop=stop_after_message):
+            got_message = True
+
+        assert mock_sleep.call_args_list == [call(0.5), call(1.0), call(2.0)]
+
+    @patch("openvip.client.time.sleep")
+    @patch("openvip.client.urllib.request.urlopen")
+    def test_subscribe_reconnect_max_delay(self, mock_urlopen, mock_sleep):
+        valid_id = "550e8400-e29b-41d4-a716-446655440000"
+        lines = [
+            f'data: {{"openvip":"1.0","type":"transcription","id":"{valid_id}","timestamp":"2026-01-01T00:00:00Z","text":"ok"}}\n'.encode(),
+        ]
+        # Many failures to hit max delay
+        mock_urlopen.side_effect = [
+            ConnectionRefusedError("refused"),
+            ConnectionRefusedError("refused"),
+            ConnectionRefusedError("refused"),
+            ConnectionRefusedError("refused"),
+            ConnectionRefusedError("refused"),
+            _FakeSSEResponse(lines),
+        ]
+        got_message = False
+
+        def stop_after_message():
+            return got_message
+
+        client = Client("http://test:8770")
+        for msg in client.subscribe("my-agent", reconnect=True, max_retry_delay=2.0, stop=stop_after_message):
+            got_message = True
+
+        # 0.5, 1.0, 2.0, 2.0, 2.0 (capped at max)
+        delays = [c.args[0] for c in mock_sleep.call_args_list]
+        assert delays == [0.5, 1.0, 2.0, 2.0, 2.0]
+
+    @patch("openvip.client.urllib.request.urlopen")
+    def test_subscribe_reconnect_still_raises_on_409(self, mock_urlopen):
+        mock_urlopen.side_effect = urllib.error.HTTPError(
+            url="", code=409, msg="Conflict", hdrs=None, fp=None,
+        )
+        client = Client("http://test:8770")
+
+        with pytest.raises(DuplicateAgentError):
+            list(client.subscribe("my-agent", reconnect=True))
+
+    @patch("openvip.client.urllib.request.urlopen")
+    def test_subscribe_stop_callable(self, mock_urlopen):
+        valid_id = "550e8400-e29b-41d4-a716-446655440000"
+        call_count = 0
+
+        def stop():
+            nonlocal call_count
+            call_count += 1
+            return call_count > 2
+
+        lines = [
+            f'data: {{"openvip":"1.0","type":"transcription","id":"{valid_id}","timestamp":"2026-01-01T00:00:00Z","text":"a"}}\n'.encode(),
+            f'data: {{"openvip":"1.0","type":"transcription","id":"{valid_id}","timestamp":"2026-01-01T00:00:01Z","text":"b"}}\n'.encode(),
+            f'data: {{"openvip":"1.0","type":"transcription","id":"{valid_id}","timestamp":"2026-01-01T00:00:02Z","text":"c"}}\n'.encode(),
+        ]
+        mock_urlopen.return_value = _FakeSSEResponse(lines)
+
+        client = Client("http://test:8770")
+        messages = list(client.subscribe("my-agent", stop=stop))
+
+        assert len(messages) == 2
+
+    @patch("openvip.client.urllib.request.urlopen")
+    def test_subscribe_no_reconnect_raises_on_error(self, mock_urlopen):
+        mock_urlopen.side_effect = ConnectionRefusedError("refused")
+        client = Client("http://test:8770")
+
+        with pytest.raises(ConnectionRefusedError):
+            list(client.subscribe("my-agent", reconnect=False))
+
+
+class TestClientIsAvailable:
+    @patch("openvip.client.urllib.request.urlopen")
+    def test_is_available_true(self, mock_urlopen):
+        mock_urlopen.return_value = _mock_response({
+            "protocol_version": "1.0",
+            "connected_agents": [],
+        })
+        client = Client("http://test:8770")
+
+        assert client.is_available() is True
+
+    @patch("openvip.client.urllib.request.urlopen")
+    def test_is_available_false(self, mock_urlopen):
+        mock_urlopen.side_effect = ConnectionRefusedError("refused")
+        client = Client("http://test:8770")
+
+        assert client.is_available() is False

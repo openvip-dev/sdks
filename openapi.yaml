@@ -10,18 +10,32 @@ info:
 
     ```bash
     # Subscribe to messages (SSE) — this IS the registration
-    curl http://localhost:8770/agents/my-agent-id/messages
+    curl -H "Authorization: Bearer $TOKEN" \
+      http://localhost:8770/agents/my-agent-id/messages
 
     # Send a message to an agent
     curl -X POST http://localhost:8770/agents/my-agent-id/messages \
+      -H "Authorization: Bearer $TOKEN" \
       -H "Content-Type: application/json" \
       -d '{"openvip": "1.0", "type": "transcription", "id": "uuid", "timestamp": "2026-02-06T10:30:00Z", "text": "hello"}'
 
     # Text-to-speech
     curl -X POST http://localhost:8770/speech \
+      -H "Authorization: Bearer $TOKEN" \
       -H "Content-Type: application/json" \
       -d '{"openvip": "1.0", "type": "speech", "text": "hello world", "language": "en"}'
     ```
+
+    ## Authorization
+
+    Servers MAY require a Bearer token on any endpoint. When enforced, clients
+    MUST include an `Authorization: Bearer <token>` header. Servers that bind
+    only to localhost may skip enforcement. The token format and distribution
+    mechanism are implementation-defined (e.g., file-based, environment variable).
+
+    Requiring the `Authorization` header also mitigates browser-based CSRF:
+    the custom header triggers a CORS preflight that the server rejects
+    (no CORS headers), blocking cross-origin requests entirely.
 
     ## Agent Lifecycle
 
@@ -74,6 +88,12 @@ paths:
                 type: string
               example: |
                 data: {"openvip":"1.0","type":"transcription","id":"...","text":"hello"}
+        '401':
+          description: Missing or invalid authorization token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '409':
           description: Agent ID already connected
           content:
@@ -180,6 +200,36 @@ paths:
               schema:
                 $ref: '#/components/schemas/Status'
 
+  /status/stream:
+    get:
+      operationId: subscribeStatus
+      summary: Subscribe to status changes (SSE)
+      description: |
+        Server-Sent Events stream that pushes status updates on state transitions.
+
+        Events are sent when `state`, `connected_agents`, or other discrete
+        fields change. Continuously changing fields (e.g., `uptime_seconds`)
+        do not trigger events.
+
+        The payload of each event is a `Status` object — the same schema as
+        the `GET /status` response.
+
+        Keepalive comments (`: keepalive`) are sent every 30 seconds if no
+        events occur.
+
+        Clients that cannot use SSE should fall back to polling `GET /status`.
+      tags:
+        - Status
+      responses:
+        '200':
+          description: SSE stream established
+          content:
+            text/event-stream:
+              schema:
+                type: string
+              example: |
+                data: {"protocol_version":"1.0","state":"listening","connected_agents":["claude"],"platform":{...}}
+
   /control:
     post:
       operationId: sendControl
@@ -215,7 +265,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+security:
+  - bearerAuth: []
+  - {}  # auth is optional — servers decide whether to enforce
+
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: |
+        Optional Bearer token. Servers MAY require this on any endpoint.
+        When not enforced, unauthenticated requests are accepted normally.
+
   schemas:
     Transcription:
       type: object
@@ -321,6 +383,10 @@ components:
           type: string
           description: Supported OpenVIP protocol version
           example: "1.0"
+        state:
+          type: string
+          description: Current engine state
+          example: "listening"
         connected_agents:
           type: array
           items:
@@ -373,6 +439,7 @@ components:
           type: string
           description: Machine-readable error code
           enum:
+            - UNAUTHORIZED
             - INVALID_FORMAT
             - MISSING_FIELD
             - NOT_FOUND

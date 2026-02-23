@@ -1,13 +1,13 @@
 [project]
 name = "openvip"
 version = "1.0.0"
-description = "OpenVIP API"
+description = "Python SDK for the OpenVIP voice interaction protocol"
 authors = [
-  {name = "OpenVIP",email = "team@openapitools.org"},
+  {name = "dragfly"},
 ]
-license = { text = "CC BY 4.0" }
+license = "CC-BY-4.0"
 readme = "README.md"
-keywords = ["OpenAPI", "OpenAPI-Generator", "OpenVIP API"]
+keywords = ["openvip", "voice", "speech", "sdk", "sse", "voice-interaction"]
 requires-python = ">=3.9"
 
 dependencies = [
@@ -18,7 +18,9 @@ dependencies = [
 ]
 
 [project.urls]
-Repository = "https://github.com/GIT_USER_ID/GIT_REPO_ID"
+Homepage = "https://github.com/openvip-dev/sdks"
+Repository = "https://github.com/openvip-dev/sdks"
+Issues = "https://github.com/openvip-dev/sdks/issues"
 
 [tool.poetry]
 requires-poetry = ">=2.0"

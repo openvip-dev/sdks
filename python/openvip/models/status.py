@@ -27,9 +27,10 @@ class Status(BaseModel):
     Engine status
     """ # noqa: E501
     protocol_version: Optional[StrictStr] = Field(default=None, description="Supported OpenVIP protocol version")
+    state: Optional[StrictStr] = Field(default=None, description="Current engine state")
     connected_agents: Optional[List[StrictStr]] = Field(default=None, description="List of connected agent identifiers")
     platform: Optional[Dict[str, Any]] = Field(default=None, description="Implementation-specific details (opaque to protocol)")
-    __properties: ClassVar[List[str]] = ["protocol_version", "connected_agents", "platform"]
+    __properties: ClassVar[List[str]] = ["protocol_version", "state", "connected_agents", "platform"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -83,6 +84,7 @@ class Status(BaseModel):
 
         _obj = cls.model_validate({
             "protocol_version": obj.get("protocol_version"),
+            "state": obj.get("state"),
             "connected_agents": obj.get("connected_agents"),
             "platform": obj.get("platform")
         })

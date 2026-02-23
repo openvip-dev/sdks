@@ -14,15 +14,20 @@ Example::
     msg = create_transcription("turn on the light", language="en")
     client.send_message("my-agent", msg)
 
-    # SSE subscription
+    # SSE subscription (agent messages)
     for message in client.subscribe("my-agent"):
         print(message.text)
+
+    # SSE subscription (status changes)
+    for status in client.subscribe_status(reconnect=True):
+        print(status.state, status.connected_agents)
 """
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 # Convenience API (hand-written)
 from openvip.client import Client as Client
+from openvip.client import DuplicateAgentError as DuplicateAgentError
 from openvip.messages import (
     PROTOCOL_VERSION as PROTOCOL_VERSION,
     create_speech_request as create_speech_request,
@@ -49,6 +54,7 @@ from openvip.configuration import Configuration as Configuration
 __all__ = [
     # Convenience (use these)
     "Client",
+    "DuplicateAgentError",
     "create_transcription",
     "create_speech_request",
     "PROTOCOL_VERSION",
