@@ -20,7 +20,7 @@ info:
     # Text-to-speech
     curl -X POST http://localhost:8770/speech \
       -H "Content-Type: application/json" \
-      -d '{"openvip": "1.0", "type": "speech", "text": "hello world", "language": "en"}'
+      -d '{"openvip": "1.0", "type": "speech", "id": "uuid", "timestamp": "2026-02-06T10:30:05Z", "text": "hello world", "language": "en"}'
     ```
 
     ## Agent Lifecycle
@@ -101,7 +101,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Transcription'
+              $ref: '#/components/schemas/Message'
             example:
               openvip: "1.0"
               type: "transcription"
@@ -115,7 +115,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Ack'
+                $ref: '#/components/schemas/Response'
         '400':
           description: Invalid message format
           content:
@@ -146,6 +146,8 @@ paths:
             example:
               openvip: "1.0"
               type: "speech"
+              id: "660e8400-e29b-41d4-a716-446655440001"
+              timestamp: "2026-02-06T10:30:05Z"
               text: "Light turned on"
               language: "en"
       responses:
@@ -187,9 +189,9 @@ paths:
       description: |
         Server-Sent Events stream that pushes status updates on state transitions.
 
-        Events are sent when `state`, `connected_agents`, or other discrete
-        fields change. Continuously changing fields (e.g., `uptime_seconds`)
-        do not trigger events.
+        Events are sent when `stt`, `tts`, `connected_agents`, or other
+        discrete fields change. Continuously changing fields (e.g.,
+        `uptime_seconds`) do not trigger events.
 
         The payload of each event is a `Status` object — the same schema as
         the `GET /status` response.
@@ -208,7 +210,7 @@ paths:
               schema:
                 type: string
               example: |
-                data: {"protocol_version":"1.0","state":"listening","connected_agents":["claude"],"platform":{...}}
+                data: {"openvip":"1.0","stt":{"enabled":true,"active":true},"tts":{"enabled":true},"connected_agents":["claude"],"platform":{...}}
 
   /control:
     post:
@@ -230,6 +232,8 @@ paths:
             schema:
               $ref: '#/components/schemas/ControlRequest'
             example:
+              openvip: "1.0"
+              id: "770e8400-e29b-41d4-a716-446655440000"
               command: "stt.stop"
       responses:
         '200':
@@ -237,7 +241,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Ack'
+                $ref: '#/components/schemas/Response'
         '400':
           description: Invalid command
           content:
@@ -247,9 +251,9 @@ paths:
 
 components:
   schemas:
-    Transcription:
+    Message:
       type: object
-      description: Voice transcription message
+      description: Base OpenVIP message
       required:
         - openvip
         - type
@@ -260,11 +264,11 @@ components:
         openvip:
           type: string
           description: Protocol version
-          example: "1.0"
+          const: "1.0"
         type:
           type: string
           description: Message type
-          enum: [transcription]
+          enum: [transcription, speech]
         id:
           type: string
           format: uuid
@@ -275,8 +279,7 @@ components:
           description: ISO 8601 timestamp
         text:
           type: string
-          description: Transcribed text
-          example: "turn on the light"
+          description: Message text content
         origin:
           type: string
           description: Producer identifier
@@ -286,14 +289,6 @@ components:
           pattern: '^[a-z]{2}(-[A-Z]{2})?$'
           description: BCP 47 language tag
           example: "en"
-        confidence:
-          type: number
-          minimum: 0
-          maximum: 1
-          description: Transcription confidence score
-        partial:
-          type: boolean
-          description: If true, this is an incomplete transcription in progress
         trace_id:
           type: string
           format: uuid
@@ -304,58 +299,87 @@ components:
           description: ID of the parent message (OpenTelemetry-style)
       additionalProperties: true
 
+    Transcription:
+      description: Voice transcription message
+      allOf:
+        - $ref: '#/components/schemas/Message'
+        - type: object
+          properties:
+            type:
+              type: string
+              enum: [transcription]
+            confidence:
+              type: number
+              minimum: 0
+              maximum: 1
+              description: Transcription confidence score
+            partial:
+              type: boolean
+              description: If true, this is an incomplete transcription in progress
+
     SpeechRequest:
-      type: object
       description: Text-to-speech request
-      required:
-        - openvip
-        - type
-        - text
-      properties:
-        openvip:
-          type: string
-          description: Protocol version
-          example: "1.0"
-        type:
-          type: string
-          description: Message type
-          enum: [speech]
-        text:
-          type: string
-          description: Text to synthesize
-          example: "Light turned on"
-        language:
-          type: string
-          pattern: '^[a-z]{2}(-[A-Z]{2})?$'
-          description: BCP 47 language tag
-          example: "en"
-      additionalProperties: true
+      allOf:
+        - $ref: '#/components/schemas/Message'
+        - type: object
+          properties:
+            type:
+              type: string
+              enum: [speech]
 
     SpeechResponse:
       type: object
       description: Speech synthesis response
       required:
+        - openvip
         - status
       properties:
+        openvip:
+          type: string
+          description: Protocol version
+          const: "1.0"
         status:
           type: string
           enum: [ok]
         duration_ms:
           type: integer
           description: Duration of the synthesized audio in milliseconds
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for this response (assigned by the engine)
+        ref:
+          type: string
+          format: uuid
+          description: ID of the speech request that triggered this response
 
     Status:
       type: object
       description: Engine status
+      required:
+        - openvip
       properties:
-        protocol_version:
+        openvip:
           type: string
-          description: Supported OpenVIP protocol version
-          example: "1.0"
-        state:
-          type: string
-          description: Current engine state
-          example: "listening"
+          description: Protocol version
+          const: "1.0"
+        stt:
+          type: object
+          description: Speech-to-text service status
+          properties:
+            enabled:
+              type: boolean
+              description: STT service available on this engine
+            active:
+              type: boolean
+              description: Microphone is currently listening
+        tts:
+          type: object
+          description: Text-to-speech service status
+          properties:
+            enabled:
+              type: boolean
+              description: TTS service available on this engine
         connected_agents:
           type: array
           items:
@@ -370,8 +394,18 @@ components:
       type: object
       description: Control command request
       required:
+        - openvip
+        - id
         - command
       properties:
+        openvip:
+          type: string
+          description: Protocol version
+          const: "1.0"
+        id:
+          type: string
+          format: uuid
+          description: Unique request identifier (UUID v4)
         command:
           type: string
           description: Command to execute
@@ -380,27 +414,41 @@ components:
             - stt.stop
             - engine.shutdown
 
-    Ack:
+    Response:
       type: object
-      description: Acknowledgment response
+      description: Operation response
       required:
+        - openvip
         - status
       properties:
+        openvip:
+          type: string
+          description: Protocol version
+          const: "1.0"
         status:
           type: string
           enum: [ok]
-          description: Acknowledgment status
+          description: Operation status
         id:
           type: string
           format: uuid
-          description: Message ID (when applicable)
+          description: Unique identifier for this response (assigned by the engine)
+        ref:
+          type: string
+          format: uuid
+          description: ID of the request that triggered this response
 
     Error:
       type: object
       description: Error response
       required:
+        - openvip
         - error
       properties:
+        openvip:
+          type: string
+          description: Protocol version
+          const: "1.0"
         error:
           type: string
           description: Human-readable error message
@@ -413,6 +461,14 @@ components:
             - NOT_FOUND
             - CONFLICT
             - INTERNAL_ERROR
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for this error (assigned by the engine)
+        ref:
+          type: string
+          format: uuid
+          description: ID of the request that caused this error
 
 tags:
   - name: Messages

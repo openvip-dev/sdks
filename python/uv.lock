@@ -13,7 +13,7 @@ wheels = [
 
 [[package]]
 name = "openvip"
-version = "1.0.1"
+version = "1.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "pydantic" },
@@ -24,7 +24,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "pydantic", specifier = ">=2" },
+    { name = "pydantic", specifier = ">=2.11" },
     { name = "python-dateutil", specifier = ">=2.8.2" },
     { name = "typing-extensions", specifier = ">=4.7.1" },
     { name = "urllib3", specifier = ">=2.1.0,<3.0.0" },

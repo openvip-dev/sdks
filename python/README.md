@@ -17,7 +17,7 @@ curl -X POST http://localhost:8770/agents/my-agent-id/messages \\
 # Text-to-speech
 curl -X POST http://localhost:8770/speech \\
   -H \"Content-Type: application/json\" \\
-  -d '{\"openvip\": \"1.0\", \"type\": \"speech\", \"text\": \"hello world\", \"language\": \"en\"}'
+  -d '{\"openvip\": \"1.0\", \"type\": \"speech\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:05Z\", \"text\": \"hello world\", \"language\": \"en\"}'
 ```
 
 ## Agent Lifecycle
@@ -45,9 +45,9 @@ Python 3.9+
 If the python package is hosted on a repository, you can install directly using:
 
 ```sh
-pip install git+https://github.com/openvip-dev/sdks.git
+pip install git+https://github.com/GIT_USER_ID/GIT_REPO_ID.git
 ```
-(you may need to run `pip` with root permission: `sudo pip install git+https://github.com/openvip-dev/sdks.git`)
+(you may need to run `pip` with root permission: `sudo pip install git+https://github.com/GIT_USER_ID/GIT_REPO_ID.git`)
 
 Then import the package:
 ```python
@@ -94,7 +94,7 @@ configuration = openvip.Configuration(
 with openvip.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = openvip.ControlApi(api_client)
-    control_request = {"command":"stt.stop"} # ControlRequest | 
+    control_request = {"openvip":"1.0","id":"770e8400-e29b-41d4-a716-446655440000","command":"stt.stop"} # ControlRequest | 
 
     try:
         # Send control command
@@ -122,12 +122,15 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
- - [Ack](docs/Ack.md)
  - [ControlRequest](docs/ControlRequest.md)
  - [Error](docs/Error.md)
+ - [Message](docs/Message.md)
+ - [Response](docs/Response.md)
  - [SpeechRequest](docs/SpeechRequest.md)
  - [SpeechResponse](docs/SpeechResponse.md)
  - [Status](docs/Status.md)
+ - [StatusStt](docs/StatusStt.md)
+ - [StatusTts](docs/StatusTts.md)
  - [Transcription](docs/Transcription.md)
 
 

@@ -6,6 +6,8 @@ Control command request
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**openvip** | **str** | Protocol version | 
+**id** | **UUID** | Unique request identifier (UUID v4) | 
 **command** | **str** | Command to execute | 
 
 ## Example

@@ -6,8 +6,11 @@ Error response
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**openvip** | **str** | Protocol version | 
 **error** | **str** | Human-readable error message | 
 **code** | **str** | Machine-readable error code | [optional] 
+**id** | **UUID** | Unique identifier for this error (assigned by the engine) | [optional] 
+**ref** | **UUID** | ID of the request that caused this error | [optional] 
 
 ## Example
 

@@ -82,9 +82,9 @@ Subscribe to status changes (SSE)
 
 Server-Sent Events stream that pushes status updates on state transitions.
 
-Events are sent when `state`, `connected_agents`, or other discrete
-fields change. Continuously changing fields (e.g., `uptime_seconds`)
-do not trigger events.
+Events are sent when `stt`, `tts`, `connected_agents`, or other
+discrete fields change. Continuously changing fields (e.g.,
+`uptime_seconds`) do not trigger events.
 
 The payload of each event is a `Status` object — the same schema as
 the `GET /status` response.

@@ -80,7 +80,6 @@ generate() {
 
     echo ""
     echo "Generating: $lang ($generator)..."
-    rm -rf "$lang"
 
     docker run --rm \
         -v "$SCRIPT_DIR:/local" \

@@ -6,8 +6,11 @@ Speech synthesis response
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**openvip** | **str** | Protocol version | 
 **status** | **str** |  | 
 **duration_ms** | **int** | Duration of the synthesized audio in milliseconds | [optional] 
+**id** | **UUID** | Unique identifier for this response (assigned by the engine) | [optional] 
+**ref** | **UUID** | ID of the speech request that triggered this response | [optional] 
 
 ## Example
 

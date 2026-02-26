@@ -9,7 +9,7 @@ Method | HTTP request | Description
 
 
 # **send_message**
-> Ack send_message(agent_id, transcription)
+> Response send_message(agent_id, message)
 
 Send message to agent
 
@@ -22,8 +22,8 @@ The agent must be connected via SSE (GET endpoint) to receive messages.
 
 ```python
 import openvip
-from openvip.models.ack import Ack
-from openvip.models.transcription import Transcription
+from openvip.models.message import Message
+from openvip.models.response import Response
 from openvip.rest import ApiException
 from pprint import pprint
 
@@ -39,11 +39,11 @@ with openvip.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = openvip.MessagesApi(api_client)
     agent_id = 'agent_id_example' # str | Agent identifier
-    transcription = {"openvip":"1.0","type":"transcription","id":"550e8400-e29b-41d4-a716-446655440000","timestamp":"2026-02-06T10:30:00Z","text":"turn on the light","language":"en"} # Transcription | 
+    message = {"openvip":"1.0","type":"transcription","id":"550e8400-e29b-41d4-a716-446655440000","timestamp":"2026-02-06T10:30:00Z","text":"turn on the light","language":"en"} # Message | 
 
     try:
         # Send message to agent
-        api_response = api_instance.send_message(agent_id, transcription)
+        api_response = api_instance.send_message(agent_id, message)
         print("The response of MessagesApi->send_message:\n")
         pprint(api_response)
     except Exception as e:
@@ -58,11 +58,11 @@ with openvip.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **agent_id** | **str**| Agent identifier | 
- **transcription** | [**Transcription**](Transcription.md)|  | 
+ **message** | [**Message**](Message.md)|  | 
 
 ### Return type
 
-[**Ack**](Ack.md)
+[**Response**](Response.md)
 
 ### Authorization
 

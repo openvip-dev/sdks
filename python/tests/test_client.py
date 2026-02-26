@@ -43,7 +43,7 @@ class TestClientInit:
 class TestClientSpeak:
     @patch("openvip.client.urllib.request.urlopen")
     def test_speak_basic(self, mock_urlopen):
-        mock_urlopen.return_value = _mock_response({"status": "ok", "duration_ms": 1500})
+        mock_urlopen.return_value = _mock_response({"openvip": "1.0", "status": "ok", "duration_ms": 1500})
         client = Client("http://test:8770")
 
         result = client.speak("hello", language="en")
@@ -64,7 +64,7 @@ class TestClientSpeak:
 
     @patch("openvip.client.urllib.request.urlopen")
     def test_speak_kwargs_passthrough(self, mock_urlopen):
-        mock_urlopen.return_value = _mock_response({"status": "ok"})
+        mock_urlopen.return_value = _mock_response({"openvip": "1.0", "status": "ok"})
         client = Client("http://test:8770")
 
         client.speak("hello", engine="espeak", voice="en-us", speed=180)
@@ -76,7 +76,7 @@ class TestClientSpeak:
 
     @patch("openvip.client.urllib.request.urlopen")
     def test_speak_no_kwargs(self, mock_urlopen):
-        mock_urlopen.return_value = _mock_response({"status": "ok"})
+        mock_urlopen.return_value = _mock_response({"openvip": "1.0", "status": "ok"})
         client = Client("http://test:8770")
 
         client.speak("hello")
@@ -90,7 +90,7 @@ class TestClientGetStatus:
     @patch("openvip.client.urllib.request.urlopen")
     def test_get_status(self, mock_urlopen):
         mock_urlopen.return_value = _mock_response({
-            "protocol_version": "1.0",
+            "openvip": "1.0",
             "connected_agents": ["claude", "shell"],
             "platform": {"state": "listening"},
         })
@@ -99,7 +99,7 @@ class TestClientGetStatus:
         status = client.get_status()
 
         assert isinstance(status, Status)
-        assert status.protocol_version == "1.0"
+        assert status.openvip == "1.0"
         assert status.connected_agents == ["claude", "shell"]
         assert status.platform == {"state": "listening"}
 
@@ -391,7 +391,7 @@ class TestClientIsAvailable:
     @patch("openvip.client.urllib.request.urlopen")
     def test_is_available_true(self, mock_urlopen):
         mock_urlopen.return_value = _mock_response({
-            "protocol_version": "1.0",
+            "openvip": "1.0",
             "connected_agents": [],
         })
         client = Client("http://test:8770")

@@ -90,9 +90,9 @@ class TestCreateSpeechRequest:
     def test_to_dict(self):
         req = create_speech_request("hello", language="en")
         d = req.to_dict()
-        assert d == {
-            "openvip": PROTOCOL_VERSION,
-            "type": "speech",
-            "text": "hello",
-            "language": "en",
-        }
+        assert d["openvip"] == PROTOCOL_VERSION
+        assert d["type"] == "speech"
+        assert d["text"] == "hello"
+        assert d["language"] == "en"
+        assert "id" in d
+        assert "timestamp" in d

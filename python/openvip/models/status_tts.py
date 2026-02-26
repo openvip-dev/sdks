@@ -17,36 +17,17 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr, field_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictBool
 from typing import Any, ClassVar, Dict, List, Optional
-from uuid import UUID
 from typing import Optional, Set
 from typing_extensions import Self
 
-class SpeechResponse(BaseModel):
+class StatusTts(BaseModel):
     """
-    Speech synthesis response
+    Text-to-speech service status
     """ # noqa: E501
-    openvip: StrictStr = Field(description="Protocol version")
-    status: StrictStr
-    duration_ms: Optional[StrictInt] = Field(default=None, description="Duration of the synthesized audio in milliseconds")
-    id: Optional[UUID] = Field(default=None, description="Unique identifier for this response (assigned by the engine)")
-    ref: Optional[UUID] = Field(default=None, description="ID of the speech request that triggered this response")
-    __properties: ClassVar[List[str]] = ["openvip", "status", "duration_ms", "id", "ref"]
-
-    @field_validator('openvip')
-    def openvip_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['1.0']):
-            raise ValueError("must be one of enum values ('1.0')")
-        return value
-
-    @field_validator('status')
-    def status_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['ok']):
-            raise ValueError("must be one of enum values ('ok')")
-        return value
+    enabled: Optional[StrictBool] = Field(default=None, description="TTS service available on this engine")
+    __properties: ClassVar[List[str]] = ["enabled"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -67,7 +48,7 @@ class SpeechResponse(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of SpeechResponse from a JSON string"""
+        """Create an instance of StatusTts from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -92,7 +73,7 @@ class SpeechResponse(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of SpeechResponse from a dict"""
+        """Create an instance of StatusTts from a dict"""
         if obj is None:
             return None
 
@@ -100,11 +81,7 @@ class SpeechResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "openvip": obj.get("openvip"),
-            "status": obj.get("status"),
-            "duration_ms": obj.get("duration_ms"),
-            "id": obj.get("id"),
-            "ref": obj.get("ref")
+            "enabled": obj.get("enabled")
         })
         return _obj
 

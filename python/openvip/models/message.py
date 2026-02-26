@@ -17,22 +17,29 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr, field_validator
+from datetime import datetime
+from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
 from uuid import UUID
 from typing import Optional, Set
 from typing_extensions import Self
 
-class SpeechResponse(BaseModel):
+class Message(BaseModel):
     """
-    Speech synthesis response
+    Base OpenVIP message
     """ # noqa: E501
     openvip: StrictStr = Field(description="Protocol version")
-    status: StrictStr
-    duration_ms: Optional[StrictInt] = Field(default=None, description="Duration of the synthesized audio in milliseconds")
-    id: Optional[UUID] = Field(default=None, description="Unique identifier for this response (assigned by the engine)")
-    ref: Optional[UUID] = Field(default=None, description="ID of the speech request that triggered this response")
-    __properties: ClassVar[List[str]] = ["openvip", "status", "duration_ms", "id", "ref"]
+    type: StrictStr = Field(description="Message type")
+    id: UUID = Field(description="Unique message identifier")
+    timestamp: datetime = Field(description="ISO 8601 timestamp")
+    text: StrictStr = Field(description="Message text content")
+    origin: Optional[StrictStr] = Field(default=None, description="Producer identifier")
+    language: Optional[Annotated[str, Field(strict=True)]] = Field(default=None, description="BCP 47 language tag")
+    trace_id: Optional[UUID] = Field(default=None, description="ID of the original message (OpenTelemetry-style)")
+    parent_id: Optional[UUID] = Field(default=None, description="ID of the parent message (OpenTelemetry-style)")
+    additional_properties: Dict[str, Any] = {}
+    __properties: ClassVar[List[str]] = ["openvip", "type", "id", "timestamp", "text", "origin", "language", "trace_id", "parent_id"]
 
     @field_validator('openvip')
     def openvip_validate_enum(cls, value):
@@ -41,11 +48,21 @@ class SpeechResponse(BaseModel):
             raise ValueError("must be one of enum values ('1.0')")
         return value
 
-    @field_validator('status')
-    def status_validate_enum(cls, value):
+    @field_validator('type')
+    def type_validate_enum(cls, value):
         """Validates the enum"""
-        if value not in set(['ok']):
-            raise ValueError("must be one of enum values ('ok')")
+        if value not in set(['transcription', 'speech']):
+            raise ValueError("must be one of enum values ('transcription', 'speech')")
+        return value
+
+    @field_validator('language')
+    def language_validate_regular_expression(cls, value):
+        """Validates the regular expression"""
+        if value is None:
+            return value
+
+        if not re.match(r"^[a-z]{2}(-[A-Z]{2})?$", value):
+            raise ValueError(r"must validate the regular expression /^[a-z]{2}(-[A-Z]{2})?$/")
         return value
 
     model_config = ConfigDict(
@@ -67,7 +84,7 @@ class SpeechResponse(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of SpeechResponse from a JSON string"""
+        """Create an instance of Message from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -79,8 +96,10 @@ class SpeechResponse(BaseModel):
         * `None` is only added to the output dict for nullable fields that
           were set at model initialization. Other fields with value `None`
           are ignored.
+        * Fields in `self.additional_properties` are added to the output dict.
         """
         excluded_fields: Set[str] = set([
+            "additional_properties",
         ])
 
         _dict = self.model_dump(
@@ -88,11 +107,16 @@ class SpeechResponse(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # puts key-value pairs in additional_properties in the top level
+        if self.additional_properties is not None:
+            for _key, _value in self.additional_properties.items():
+                _dict[_key] = _value
+
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of SpeechResponse from a dict"""
+        """Create an instance of Message from a dict"""
         if obj is None:
             return None
 
@@ -101,11 +125,20 @@ class SpeechResponse(BaseModel):
 
         _obj = cls.model_validate({
             "openvip": obj.get("openvip"),
-            "status": obj.get("status"),
-            "duration_ms": obj.get("duration_ms"),
+            "type": obj.get("type"),
             "id": obj.get("id"),
-            "ref": obj.get("ref")
+            "timestamp": obj.get("timestamp"),
+            "text": obj.get("text"),
+            "origin": obj.get("origin"),
+            "language": obj.get("language"),
+            "trace_id": obj.get("trace_id"),
+            "parent_id": obj.get("parent_id")
         })
+        # store additional fields in additional_properties
+        for _key in obj.keys():
+            if _key not in cls.__properties:
+                _obj.additional_properties[_key] = obj.get(_key)
+
         return _obj
 
 

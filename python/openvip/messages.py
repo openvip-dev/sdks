@@ -74,6 +74,8 @@ def create_speech_request(
     return SpeechRequest(
         openvip=PROTOCOL_VERSION,
         type="speech",
+        id=uuid4(),
+        timestamp=datetime.now(timezone.utc),
         text=text,
         language=language,
     )

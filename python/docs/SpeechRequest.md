@@ -7,9 +7,14 @@ Text-to-speech request
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **openvip** | **str** | Protocol version | 
-**type** | **str** | Message type | 
-**text** | **str** | Text to synthesize | 
+**type** | **str** |  | 
+**id** | **UUID** | Unique message identifier | 
+**timestamp** | **datetime** | ISO 8601 timestamp | 
+**text** | **str** | Message text content | 
+**origin** | **str** | Producer identifier | [optional] 
 **language** | **str** | BCP 47 language tag | [optional] 
+**trace_id** | **UUID** | ID of the original message (OpenTelemetry-style) | [optional] 
+**parent_id** | **UUID** | ID of the parent message (OpenTelemetry-style) | [optional] 
 
 ## Example
 

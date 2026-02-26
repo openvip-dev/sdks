@@ -8,7 +8,7 @@ Method | HTTP request | Description
 
 
 # **send_control**
-> Ack send_control(control_request)
+> Response send_control(control_request)
 
 Send control command
 
@@ -25,8 +25,8 @@ Available commands:
 
 ```python
 import openvip
-from openvip.models.ack import Ack
 from openvip.models.control_request import ControlRequest
+from openvip.models.response import Response
 from openvip.rest import ApiException
 from pprint import pprint
 
@@ -41,7 +41,7 @@ configuration = openvip.Configuration(
 with openvip.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = openvip.ControlApi(api_client)
-    control_request = {"command":"stt.stop"} # ControlRequest | 
+    control_request = {"openvip":"1.0","id":"770e8400-e29b-41d4-a716-446655440000","command":"stt.stop"} # ControlRequest | 
 
     try:
         # Send control command
@@ -63,7 +63,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**Ack**](Ack.md)
+[**Response**](Response.md)
 
 ### Authorization
 

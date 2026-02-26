@@ -17,22 +17,21 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr, field_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
 from uuid import UUID
 from typing import Optional, Set
 from typing_extensions import Self
 
-class SpeechResponse(BaseModel):
+class Response(BaseModel):
     """
-    Speech synthesis response
+    Operation response
     """ # noqa: E501
     openvip: StrictStr = Field(description="Protocol version")
-    status: StrictStr
-    duration_ms: Optional[StrictInt] = Field(default=None, description="Duration of the synthesized audio in milliseconds")
+    status: StrictStr = Field(description="Operation status")
     id: Optional[UUID] = Field(default=None, description="Unique identifier for this response (assigned by the engine)")
-    ref: Optional[UUID] = Field(default=None, description="ID of the speech request that triggered this response")
-    __properties: ClassVar[List[str]] = ["openvip", "status", "duration_ms", "id", "ref"]
+    ref: Optional[UUID] = Field(default=None, description="ID of the request that triggered this response")
+    __properties: ClassVar[List[str]] = ["openvip", "status", "id", "ref"]
 
     @field_validator('openvip')
     def openvip_validate_enum(cls, value):
@@ -67,7 +66,7 @@ class SpeechResponse(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of SpeechResponse from a JSON string"""
+        """Create an instance of Response from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -92,7 +91,7 @@ class SpeechResponse(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of SpeechResponse from a dict"""
+        """Create an instance of Response from a dict"""
         if obj is None:
             return None
 
@@ -102,7 +101,6 @@ class SpeechResponse(BaseModel):
         _obj = cls.model_validate({
             "openvip": obj.get("openvip"),
             "status": obj.get("status"),
-            "duration_ms": obj.get("duration_ms"),
             "id": obj.get("id"),
             "ref": obj.get("ref")
         })

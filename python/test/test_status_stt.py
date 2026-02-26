@@ -1,6 +1,5 @@
 # coding: utf-8
 
-# flake8: noqa
 """
     OpenVIP API
 
@@ -12,15 +11,42 @@
     Do not edit the class manually.
 """  # noqa: E501
 
-# import models into model package
-from openvip.models.control_request import ControlRequest
-from openvip.models.error import Error
-from openvip.models.message import Message
-from openvip.models.response import Response
-from openvip.models.speech_request import SpeechRequest
-from openvip.models.speech_response import SpeechResponse
-from openvip.models.status import Status
-from openvip.models.status_stt import StatusStt
-from openvip.models.status_tts import StatusTts
-from openvip.models.transcription import Transcription
 
+import unittest
+
+from openvip.models.status_stt import StatusStt
+
+class TestStatusStt(unittest.TestCase):
+    """StatusStt unit test stubs"""
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def make_instance(self, include_optional) -> StatusStt:
+        """Test StatusStt
+            include_optional is a boolean, when False only required
+            params are included, when True both required and
+            optional params are included """
+        # uncomment below to create an instance of `StatusStt`
+        """
+        model = StatusStt()
+        if include_optional:
+            return StatusStt(
+                enabled = True,
+                active = True
+            )
+        else:
+            return StatusStt(
+        )
+        """
+
+    def testStatusStt(self):
+        """Test StatusStt"""
+        # inst_req_only = self.make_instance(include_optional=False)
+        # inst_req_and_optional = self.make_instance(include_optional=True)
+
+if __name__ == '__main__':
+    unittest.main()

@@ -36,7 +36,7 @@ configuration = openvip.Configuration(
 with openvip.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = openvip.SpeechApi(api_client)
-    speech_request = {"openvip":"1.0","type":"speech","text":"Light turned on","language":"en"} # SpeechRequest | 
+    speech_request = {"openvip":"1.0","type":"speech","id":"660e8400-e29b-41d4-a716-446655440001","timestamp":"2026-02-06T10:30:05Z","text":"Light turned on","language":"en"} # SpeechRequest | 
 
     try:
         # Text-to-speech request
