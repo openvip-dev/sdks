@@ -10,7 +10,7 @@ import urllib.request
 from typing import Any, Callable, Iterator
 
 from openvip.messages import PROTOCOL_VERSION, create_speech_request
-from openvip.models.ack import Ack
+from openvip.models.response import Response
 from openvip.models.speech_request import SpeechRequest
 from openvip.models.speech_response import SpeechResponse
 from openvip.models.status import Status
@@ -104,42 +104,42 @@ class Client:
 
     # --- Control ---
 
-    def control(self, command: str) -> Ack:
+    def control(self, command: str) -> Response:
         """Send a control command.
 
         Args:
             command: Command string (e.g. "stt.start", "stt.stop", "engine.shutdown").
 
         Returns:
-            Ack response.
+            Response.
         """
         data = self._post("/control", {"command": command})
-        return Ack.from_dict(data)
+        return Response.from_dict(data)
 
-    def stop_speech(self) -> Ack:
+    def stop_speech(self) -> Response:
         """Stop the currently playing TTS audio.
 
         Returns:
-            Ack response.
+            Response.
         """
         data = self._post("/speech/stop", {})
-        return Ack.from_dict(data)
+        return Response.from_dict(data)
 
-    def start_listening(self) -> Ack:
+    def start_listening(self) -> Response:
         """Start speech-to-text."""
         return self.control("stt.start")
 
-    def stop_listening(self) -> Ack:
+    def stop_listening(self) -> Response:
         """Stop speech-to-text."""
         return self.control("stt.stop")
 
-    def shutdown(self) -> Ack:
+    def shutdown(self) -> Response:
         """Request engine shutdown."""
         return self.control("engine.shutdown")
 
     # --- Messages ---
 
-    def send_message(self, agent_id: str, message: Transcription) -> Ack:
+    def send_message(self, agent_id: str, message: Transcription) -> Response:
         """Send a message to a connected agent.
 
         Args:
@@ -147,10 +147,10 @@ class Client:
             message: Transcription message to send.
 
         Returns:
-            Ack response.
+            Response.
         """
         data = self._post(f"/agents/{agent_id}/messages", message.to_dict())
-        return Ack.from_dict(data)
+        return Response.from_dict(data)
 
     def subscribe(
         self,

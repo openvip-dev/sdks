@@ -164,6 +164,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /speech/stop:
+    post:
+      operationId: stopSpeech
+      summary: Stop TTS playback
+      description: |
+        Interrupt the currently playing TTS audio immediately.
+        If no audio is playing, the request is a no-op (still returns 200).
+      tags:
+        - Speech
+      responses:
+        '200':
+          description: Stop request delivered (audio may already be finished)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+
   /status:
     get:
       operationId: getStatus

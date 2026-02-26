@@ -8,7 +8,7 @@ import pytest
 
 from openvip import Client, DuplicateAgentError
 from openvip.messages import PROTOCOL_VERSION, create_transcription
-from openvip.models.ack import Ack
+from openvip.models.response import Response
 from openvip.models.speech_response import SpeechResponse
 from openvip.models.status import Status
 
@@ -110,12 +110,12 @@ class TestClientGetStatus:
 class TestClientControl:
     @patch("openvip.client.urllib.request.urlopen")
     def test_control(self, mock_urlopen):
-        mock_urlopen.return_value = _mock_response({"status": "ok"})
+        mock_urlopen.return_value = _mock_response({"openvip": "1.0", "status": "ok"})
         client = Client("http://test:8770")
 
         result = client.control("stt.toggle")
 
-        assert isinstance(result, Ack)
+        assert isinstance(result, Response)
         assert result.status == "ok"
 
         body = json.loads(mock_urlopen.call_args[0][0].data)
@@ -124,7 +124,7 @@ class TestClientControl:
 
     @patch("openvip.client.urllib.request.urlopen")
     def test_start_listening(self, mock_urlopen):
-        mock_urlopen.return_value = _mock_response({"status": "ok"})
+        mock_urlopen.return_value = _mock_response({"openvip": "1.0", "status": "ok"})
         client = Client("http://test:8770")
 
         client.start_listening()
@@ -134,7 +134,7 @@ class TestClientControl:
 
     @patch("openvip.client.urllib.request.urlopen")
     def test_stop_listening(self, mock_urlopen):
-        mock_urlopen.return_value = _mock_response({"status": "ok"})
+        mock_urlopen.return_value = _mock_response({"openvip": "1.0", "status": "ok"})
         client = Client("http://test:8770")
 
         client.stop_listening()
@@ -144,7 +144,7 @@ class TestClientControl:
 
     @patch("openvip.client.urllib.request.urlopen")
     def test_shutdown(self, mock_urlopen):
-        mock_urlopen.return_value = _mock_response({"status": "ok"})
+        mock_urlopen.return_value = _mock_response({"openvip": "1.0", "status": "ok"})
         client = Client("http://test:8770")
 
         client.shutdown()
@@ -156,13 +156,13 @@ class TestClientControl:
 class TestClientSendMessage:
     @patch("openvip.client.urllib.request.urlopen")
     def test_send_message(self, mock_urlopen):
-        mock_urlopen.return_value = _mock_response({"status": "ok"})
+        mock_urlopen.return_value = _mock_response({"openvip": "1.0", "status": "ok"})
         client = Client("http://test:8770")
 
         msg = create_transcription("turn on the light", language="en")
         result = client.send_message("my-agent", msg)
 
-        assert isinstance(result, Ack)
+        assert isinstance(result, Response)
         req = mock_urlopen.call_args[0][0]
         assert req.full_url == "http://test:8770/agents/my-agent/messages"
 

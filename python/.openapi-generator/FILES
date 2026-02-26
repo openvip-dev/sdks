@@ -3,7 +3,6 @@
 .gitlab-ci.yml
 .travis.yml
 README.md
-docs/Ack.md
 docs/ControlApi.md
 docs/ControlRequest.md
 docs/Error.md
@@ -29,7 +28,6 @@ openvip/api_response.py
 openvip/configuration.py
 openvip/exceptions.py
 openvip/models/__init__.py
-openvip/models/ack.py
 openvip/models/control_request.py
 openvip/models/error.py
 openvip/models/message.py
@@ -47,4 +45,18 @@ setup.cfg
 setup.py
 test-requirements.txt
 test/__init__.py
+test/test_control_api.py
+test/test_control_request.py
+test/test_error.py
+test/test_message.py
+test/test_messages_api.py
+test/test_response.py
+test/test_speech_api.py
+test/test_speech_request.py
+test/test_speech_response.py
+test/test_status.py
+test/test_status_api.py
+test/test_status_stt.py
+test/test_status_tts.py
+test/test_transcription.py
 tox.ini

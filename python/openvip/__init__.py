@@ -35,7 +35,6 @@ from openvip.messages import (
 )
 
 # Generated models
-from openvip.models.ack import Ack as Ack
 from openvip.models.control_request import ControlRequest as ControlRequest
 from openvip.models.error import Error as Error
 from openvip.models.speech_request import SpeechRequest as SpeechRequest
@@ -59,7 +58,6 @@ __all__ = [
     "create_speech_request",
     "PROTOCOL_VERSION",
     # Models
-    "Ack",
     "ControlRequest",
     "Error",
     "SpeechRequest",

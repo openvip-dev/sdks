@@ -123,7 +123,6 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
- - [Ack](docs/Ack.md)
  - [ControlRequest](docs/ControlRequest.md)
  - [Error](docs/Error.md)
  - [Message](docs/Message.md)

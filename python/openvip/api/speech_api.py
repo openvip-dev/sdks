@@ -15,7 +15,7 @@ from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
-from openvip.models.ack import Ack
+from openvip.models.response import Response
 from openvip.models.speech_request import SpeechRequest
 from openvip.models.speech_response import SpeechResponse
 
@@ -52,7 +52,7 @@ class SpeechApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Ack:
+    ) -> Response:
         """Stop TTS playback
 
         Interrupt the currently playing TTS audio immediately. If no audio is playing, the request is a no-op (still returns 200). 
@@ -87,7 +87,7 @@ class SpeechApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Ack",
+            '200': "Response",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -115,7 +115,7 @@ class SpeechApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Ack]:
+    ) -> ApiResponse[Response]:
         """Stop TTS playback
 
         Interrupt the currently playing TTS audio immediately. If no audio is playing, the request is a no-op (still returns 200). 
@@ -150,7 +150,7 @@ class SpeechApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Ack",
+            '200': "Response",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -213,7 +213,7 @@ class SpeechApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Ack",
+            '200': "Response",
         }
         response_data = self.api_client.call_api(
             *_param,

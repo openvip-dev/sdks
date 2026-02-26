@@ -9,7 +9,7 @@ Method | HTTP request | Description
 
 
 # **stop_speech**
-> Ack stop_speech()
+> Response stop_speech()
 
 Stop TTS playback
 
@@ -22,7 +22,7 @@ If no audio is playing, the request is a no-op (still returns 200).
 
 ```python
 import openvip
-from openvip.models.ack import Ack
+from openvip.models.response import Response
 from openvip.rest import ApiException
 from pprint import pprint
 
@@ -55,7 +55,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-[**Ack**](Ack.md)
+[**Response**](Response.md)
 
 ### Authorization
 

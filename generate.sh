@@ -68,6 +68,29 @@ fi
 echo "Pulling openapi-generator-cli..."
 docker pull openapitools/openapi-generator-cli:latest
 
+clean_generated() {
+    local lang=$1
+    # Remove only auto-generated directories; hand-written files are untouched.
+    # Add per-language entries as new SDKs are added.
+    case "$lang" in
+        python)
+            rm -rf "$SCRIPT_DIR/python/openvip/models" \
+                   "$SCRIPT_DIR/python/openvip/api" \
+                   "$SCRIPT_DIR/python/test" \
+                   "$SCRIPT_DIR/python/docs"
+            ;;
+        dotnet)
+            rm -rf "$SCRIPT_DIR/dotnet/src" "$SCRIPT_DIR/dotnet/docs"
+            ;;
+        typescript)
+            rm -rf "$SCRIPT_DIR/typescript/src" "$SCRIPT_DIR/typescript/docs"
+            ;;
+        go)
+            rm -rf "$SCRIPT_DIR/go/api" "$SCRIPT_DIR/go/docs"
+            ;;
+    esac
+}
+
 generate() {
     local lang=$1
     local generator=$2
@@ -79,6 +102,8 @@ generate() {
     fi
 
     echo ""
+    echo "Cleaning auto-generated files: $lang..."
+    clean_generated "$lang"
     echo "Generating: $lang ($generator)..."
 
     docker run --rm \
