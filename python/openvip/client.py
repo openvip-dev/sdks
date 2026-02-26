@@ -116,6 +116,15 @@ class Client:
         data = self._post("/control", {"command": command})
         return Ack.from_dict(data)
 
+    def stop_speech(self) -> Ack:
+        """Stop the currently playing TTS audio.
+
+        Returns:
+            Ack response.
+        """
+        data = self._post("/speech/stop", {})
+        return Ack.from_dict(data)
+
     def start_listening(self) -> Ack:
         """Start speech-to-text."""
         return self.control("stt.start")
