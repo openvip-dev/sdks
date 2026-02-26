@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.0rc3] - 2026-02-26
+
+### Fixed
+- CI: added `actions/setup-dotnet@v4` (dotnet-version: 10.0.x) to .NET build
+  job — self-hosted runner had .NET 9 but project targets net10.0
+
 ## [1.0.0rc2] - 2026-02-26
 
 ### Fixed
