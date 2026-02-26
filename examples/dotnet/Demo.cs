@@ -1,6 +1,6 @@
 // OpenVIP .NET SDK demo.
 //
-// Connects to a local OpenVIP engine (e.g. VoxType) and demonstrates
+// Connects to a local OpenVIP engine (e.g. an OpenVIP engine) and demonstrates
 // SDK features: status, control, speech, and messaging.
 //
 // Usage:
@@ -28,7 +28,7 @@ try
 catch (Exception e)
 {
     Console.WriteLine($"  Error: {e.Message}");
-    Console.WriteLine("  Is the engine running? Start VoxType with: voxtype listen --agents");
+    Console.WriteLine("  Is the engine running? Start the engine: myengine listen --agents");
     Environment.Exit(1);
 }
 Console.WriteLine();

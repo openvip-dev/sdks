@@ -280,7 +280,7 @@ components:
         origin:
           type: string
           description: Producer identifier
-          example: "voxtype/3.0.0"
+          example: "myapp/1.0.0"
         language:
           type: string
           pattern: '^[a-z]{2}(-[A-Z]{2})?$'

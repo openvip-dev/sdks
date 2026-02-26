@@ -31,7 +31,7 @@ const example = {
   "id": null,
   "timestamp": null,
   "text": turn on the light,
-  "origin": voxtype/3.0.0,
+  "origin": myapp/1.0.0,
   "language": en,
   "confidence": null,
   "partial": null,

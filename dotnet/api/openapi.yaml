@@ -259,7 +259,7 @@ components:
         trace_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         openvip: "1.0"
         parent_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-        origin: voxtype/3.0.0
+        origin: myapp/1.0.0
         confidence: 0.08008281904610115
         language: en
         id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -291,7 +291,7 @@ components:
           type: string
         origin:
           description: Producer identifier
-          example: voxtype/3.0.0
+          example: myapp/1.0.0
           type: string
         language:
           description: BCP 47 language tag

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """OpenVIP Python SDK demo.
 
-Connects to a local OpenVIP engine (e.g. VoxType) and demonstrates
+Connects to a local OpenVIP engine (e.g. an OpenVIP engine) and demonstrates
 all SDK features: status, control, speech, messaging, and subscription.
 
 Usage:
@@ -36,7 +36,7 @@ def main() -> None:
             print(f"  Platform: {status.platform}")
     except Exception as e:
         print(f"  Error: {e}")
-        print("  Is the engine running? Start VoxType with: voxtype listen --agents")
+        print("  Is the engine running? Start the engine: myengine listen --agents")
         sys.exit(1)
     print()
 

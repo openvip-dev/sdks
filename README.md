@@ -101,7 +101,7 @@ Console.WriteLine(string.Join(", ", status.ConnectedAgents));
 
 ## Examples
 
-Each SDK has a runnable demo in `examples/`. Start a VoxType engine, then:
+Each SDK has a runnable demo in `examples/`. Start an OpenVIP engine, then:
 
 ```bash
 # Python

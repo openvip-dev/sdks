@@ -30,7 +30,7 @@ def create_transcription(
         language: BCP 47 language tag (e.g. "en", "it").
         confidence: Transcription confidence 0.0-1.0.
         partial: True if this is an incomplete transcription.
-        origin: Producer identifier (e.g. "voxtype/3.0.0").
+        origin: Producer identifier (e.g. "myapp/1.0.0").
         trace_id: ID of the original message (tracing).
         parent_id: ID of the parent message (tracing).
         **extensions: Additional x_ extension fields.

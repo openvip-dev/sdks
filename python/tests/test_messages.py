@@ -41,8 +41,8 @@ class TestCreateTranscription:
         assert msg.partial is True
 
     def test_origin(self):
-        msg = create_transcription("test", origin="voxtype/3.0.0")
-        assert msg.origin == "voxtype/3.0.0"
+        msg = create_transcription("test", origin="myapp/1.0.0")
+        assert msg.origin == "myapp/1.0.0"
 
     def test_trace_ids(self):
         tid = uuid4()

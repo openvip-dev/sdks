@@ -164,7 +164,7 @@ namespace OpenVip.Model
         /// Producer identifier
         /// </summary>
         /// <value>Producer identifier</value>
-        /* <example>voxtype/3.0.0</example> */
+        /* <example>myapp/1.0.0</example> */
         [JsonPropertyName("origin")]
         public string? Origin { get { return this.OriginOption; } set { this.OriginOption = new(value); } }
 

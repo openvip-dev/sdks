@@ -1,6 +1,6 @@
 // OpenVIP Go SDK demo.
 //
-// Connects to a local OpenVIP engine (e.g. VoxType) and demonstrates
+// Connects to a local OpenVIP engine (e.g. an OpenVIP engine) and demonstrates
 // SDK features: status, control, speech, and messaging.
 //
 // Usage:
@@ -39,7 +39,7 @@ func main() {
 	status, _, err := client.StatusAPI.GetStatus(ctx).Execute()
 	if err != nil {
 		fmt.Printf("  Error: %v\n", err)
-		fmt.Println("  Is the engine running? Start VoxType with: voxtype listen --agents")
+		fmt.Println("  Is the engine running? Start the engine: myengine listen --agents")
 		os.Exit(1)
 	}
 	fmt.Printf("  Protocol: %s\n", *status.ProtocolVersion)

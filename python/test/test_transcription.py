@@ -40,7 +40,7 @@ class TestTranscription(unittest.TestCase):
                 id = '',
                 timestamp = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
                 text = 'turn on the light',
-                origin = 'voxtype/3.0.0',
+                origin = 'myapp/1.0.0',
                 language = 'en',
                 confidence = 0,
                 partial = True,

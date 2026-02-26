@@ -1,7 +1,7 @@
 /**
  * OpenVIP TypeScript SDK demo.
  *
- * Connects to a local OpenVIP engine (e.g. VoxType) and demonstrates
+ * Connects to a local OpenVIP engine (e.g. an OpenVIP engine) and demonstrates
  * SDK features: status, control, speech, and messaging.
  *
  * Usage:
@@ -40,7 +40,7 @@ async function main() {
   } catch (e: any) {
     console.log(`  Error: ${e.message}`);
     console.log(
-      "  Is the engine running? Start VoxType with: voxtype listen --agents"
+      "  Is the engine running? Start the engine: myengine listen --agents"
     );
     process.exit(1);
   }
