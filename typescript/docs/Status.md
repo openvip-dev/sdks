@@ -8,6 +8,7 @@ Engine status
 Name | Type
 ------------ | -------------
 `protocolVersion` | string
+`state` | string
 `connectedAgents` | Array&lt;string&gt;
 `platform` | { [key: string]: any; }
 
@@ -19,6 +20,7 @@ import type { Status } from 'openvip'
 // TODO: Update the object below with actual values
 const example = {
   "protocolVersion": 1.0,
+  "state": listening,
   "connectedAgents": null,
   "platform": null,
 } satisfies Status

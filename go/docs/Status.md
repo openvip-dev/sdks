@@ -5,6 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **ProtocolVersion** | Pointer to **string** | Supported OpenVIP protocol version | [optional] 
+**State** | Pointer to **string** | Current engine state | [optional] 
 **ConnectedAgents** | Pointer to **[]string** | List of connected agent identifiers | [optional] 
 **Platform** | Pointer to **map[string]interface{}** | Implementation-specific details (opaque to protocol) | [optional] 
 
@@ -51,6 +52,31 @@ SetProtocolVersion sets ProtocolVersion field to given value.
 `func (o *Status) HasProtocolVersion() bool`
 
 HasProtocolVersion returns a boolean if a field has been set.
+
+### GetState
+
+`func (o *Status) GetState() string`
+
+GetState returns the State field if non-nil, zero value otherwise.
+
+### GetStateOk
+
+`func (o *Status) GetStateOk() (*string, bool)`
+
+GetStateOk returns a tuple with the State field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetState
+
+`func (o *Status) SetState(v string)`
+
+SetState sets State field to given value.
+
+### HasState
+
+`func (o *Status) HasState() bool`
+
+HasState returns a boolean if a field has been set.
 
 ### GetConnectedAgents
 

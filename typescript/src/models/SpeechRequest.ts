@@ -19,6 +19,7 @@ import { mapValues } from '../runtime';
  * @interface SpeechRequest
  */
 export interface SpeechRequest {
+    [key: string]: any | any;
     /**
      * Protocol version
      * @type {string}
@@ -75,6 +76,7 @@ export function SpeechRequestFromJSONTyped(json: any, ignoreDiscriminator: boole
     }
     return {
         
+            ...json,
         'openvip': json['openvip'],
         'type': json['type'],
         'text': json['text'],
@@ -93,6 +95,7 @@ export function SpeechRequestToJSONTyped(value?: SpeechRequest | null, ignoreDis
 
     return {
         
+            ...value,
         'openvip': value['openvip'],
         'type': value['type'],
         'text': value['text'],

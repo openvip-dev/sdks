@@ -21,6 +21,8 @@ var _ MappedNullable = &Status{}
 type Status struct {
 	// Supported OpenVIP protocol version
 	ProtocolVersion *string `json:"protocol_version,omitempty"`
+	// Current engine state
+	State *string `json:"state,omitempty"`
 	// List of connected agent identifiers
 	ConnectedAgents []string `json:"connected_agents,omitempty"`
 	// Implementation-specific details (opaque to protocol)
@@ -74,6 +76,38 @@ func (o *Status) HasProtocolVersion() bool {
 // SetProtocolVersion gets a reference to the given string and assigns it to the ProtocolVersion field.
 func (o *Status) SetProtocolVersion(v string) {
 	o.ProtocolVersion = &v
+}
+
+// GetState returns the State field value if set, zero value otherwise.
+func (o *Status) GetState() string {
+	if o == nil || IsNil(o.State) {
+		var ret string
+		return ret
+	}
+	return *o.State
+}
+
+// GetStateOk returns a tuple with the State field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Status) GetStateOk() (*string, bool) {
+	if o == nil || IsNil(o.State) {
+		return nil, false
+	}
+	return o.State, true
+}
+
+// HasState returns a boolean if a field has been set.
+func (o *Status) HasState() bool {
+	if o != nil && !IsNil(o.State) {
+		return true
+	}
+
+	return false
+}
+
+// SetState gets a reference to the given string and assigns it to the State field.
+func (o *Status) SetState(v string) {
+	o.State = &v
 }
 
 // GetConnectedAgents returns the ConnectedAgents field value if set, zero value otherwise.
@@ -152,6 +186,9 @@ func (o Status) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.ProtocolVersion) {
 		toSerialize["protocol_version"] = o.ProtocolVersion
+	}
+	if !IsNil(o.State) {
+		toSerialize["state"] = o.State
 	}
 	if !IsNil(o.ConnectedAgents) {
 		toSerialize["connected_agents"] = o.ConnectedAgents

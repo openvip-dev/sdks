@@ -34,12 +34,14 @@ namespace OpenVip.Model
         /// Initializes a new instance of the <see cref="Status" /> class.
         /// </summary>
         /// <param name="protocolVersion">Supported OpenVIP protocol version</param>
+        /// <param name="state">Current engine state</param>
         /// <param name="connectedAgents">List of connected agent identifiers</param>
         /// <param name="platform">Implementation-specific details (opaque to protocol)</param>
         [JsonConstructor]
-        public Status(Option<string?> protocolVersion = default, Option<List<string>?> connectedAgents = default, Option<Dictionary<string, Object>?> platform = default)
+        public Status(Option<string?> protocolVersion = default, Option<string?> state = default, Option<List<string>?> connectedAgents = default, Option<Dictionary<string, Object>?> platform = default)
         {
             ProtocolVersionOption = protocolVersion;
+            StateOption = state;
             ConnectedAgentsOption = connectedAgents;
             PlatformOption = platform;
             OnCreated();
@@ -61,6 +63,21 @@ namespace OpenVip.Model
         /* <example>1.0</example> */
         [JsonPropertyName("protocol_version")]
         public string? ProtocolVersion { get { return this.ProtocolVersionOption; } set { this.ProtocolVersionOption = new(value); } }
+
+        /// <summary>
+        /// Used to track the state of State
+        /// </summary>
+        [JsonIgnore]
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        public Option<string?> StateOption { get; private set; }
+
+        /// <summary>
+        /// Current engine state
+        /// </summary>
+        /// <value>Current engine state</value>
+        /* <example>listening</example> */
+        [JsonPropertyName("state")]
+        public string? State { get { return this.StateOption; } set { this.StateOption = new(value); } }
 
         /// <summary>
         /// Used to track the state of ConnectedAgents
@@ -99,6 +116,7 @@ namespace OpenVip.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class Status {\n");
             sb.Append("  ProtocolVersion: ").Append(ProtocolVersion).Append("\n");
+            sb.Append("  State: ").Append(State).Append("\n");
             sb.Append("  ConnectedAgents: ").Append(ConnectedAgents).Append("\n");
             sb.Append("  Platform: ").Append(Platform).Append("\n");
             sb.Append("}\n");
@@ -139,6 +157,7 @@ namespace OpenVip.Model
             JsonTokenType startingTokenType = utf8JsonReader.TokenType;
 
             Option<string?> protocolVersion = default;
+            Option<string?> state = default;
             Option<List<string>?> connectedAgents = default;
             Option<Dictionary<string, Object>?> platform = default;
 
@@ -160,6 +179,9 @@ namespace OpenVip.Model
                         case "protocol_version":
                             protocolVersion = new Option<string?>(utf8JsonReader.GetString()!);
                             break;
+                        case "state":
+                            state = new Option<string?>(utf8JsonReader.GetString()!);
+                            break;
                         case "connected_agents":
                             connectedAgents = new Option<List<string>?>(JsonSerializer.Deserialize<List<string>>(ref utf8JsonReader, jsonSerializerOptions)!);
                             break;
@@ -175,13 +197,16 @@ namespace OpenVip.Model
             if (protocolVersion.IsSet && protocolVersion.Value == null)
                 throw new ArgumentNullException(nameof(protocolVersion), "Property is not nullable for class Status.");
 
+            if (state.IsSet && state.Value == null)
+                throw new ArgumentNullException(nameof(state), "Property is not nullable for class Status.");
+
             if (connectedAgents.IsSet && connectedAgents.Value == null)
                 throw new ArgumentNullException(nameof(connectedAgents), "Property is not nullable for class Status.");
 
             if (platform.IsSet && platform.Value == null)
                 throw new ArgumentNullException(nameof(platform), "Property is not nullable for class Status.");
 
-            return new Status(protocolVersion, connectedAgents, platform);
+            return new Status(protocolVersion, state, connectedAgents, platform);
         }
 
         /// <summary>
@@ -211,6 +236,9 @@ namespace OpenVip.Model
             if (status.ProtocolVersionOption.IsSet && status.ProtocolVersion == null)
                 throw new ArgumentNullException(nameof(status.ProtocolVersion), "Property is required for class Status.");
 
+            if (status.StateOption.IsSet && status.State == null)
+                throw new ArgumentNullException(nameof(status.State), "Property is required for class Status.");
+
             if (status.ConnectedAgentsOption.IsSet && status.ConnectedAgents == null)
                 throw new ArgumentNullException(nameof(status.ConnectedAgents), "Property is required for class Status.");
 
@@ -219,6 +247,9 @@ namespace OpenVip.Model
 
             if (status.ProtocolVersionOption.IsSet)
                 writer.WriteString("protocol_version", status.ProtocolVersion);
+
+            if (status.StateOption.IsSet)
+                writer.WriteString("state", status.State);
 
             if (status.ConnectedAgentsOption.IsSet)
             {

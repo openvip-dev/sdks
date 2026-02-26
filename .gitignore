@@ -5,6 +5,11 @@ __pycache__/
 .DS_Store
 node_modules/
 
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
 # Future SDKs (uncomment when generated)
 rust/
 swift/

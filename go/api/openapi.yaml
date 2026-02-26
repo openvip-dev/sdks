@@ -187,6 +187,35 @@ paths:
       summary: Get engine status
       tags:
       - Status
+  /status/stream:
+    get:
+      description: |
+        Server-Sent Events stream that pushes status updates on state transitions.
+
+        Events are sent when `state`, `connected_agents`, or other discrete
+        fields change. Continuously changing fields (e.g., `uptime_seconds`)
+        do not trigger events.
+
+        The payload of each event is a `Status` object — the same schema as
+        the `GET /status` response.
+
+        Keepalive comments (`: keepalive`) are sent every 30 seconds if no
+        events occur.
+
+        Clients that cannot use SSE should fall back to polling `GET /status`.
+      operationId: subscribeStatus
+      responses:
+        "200":
+          content:
+            text/event-stream:
+              example: |
+                data: {"protocol_version":"1.0","state":"listening","connected_agents":["claude"],"platform":{...}}
+              schema:
+                type: string
+          description: SSE stream established
+      summary: Subscribe to status changes (SSE)
+      tags:
+      - Status
   /control:
     post:
       description: |
@@ -292,6 +321,7 @@ components:
       - timestamp
       - type
     SpeechRequest:
+      additionalProperties: true
       description: Text-to-speech request
       example:
         openvip: "1.0"
@@ -340,6 +370,7 @@ components:
       description: Engine status
       example:
         protocol_version: "1.0"
+        state: listening
         connected_agents:
         - connected_agents
         - connected_agents
@@ -349,6 +380,10 @@ components:
         protocol_version:
           description: Supported OpenVIP protocol version
           example: "1.0"
+          type: string
+        state:
+          description: Current engine state
+          example: listening
           type: string
         connected_agents:
           description: List of connected agent identifiers

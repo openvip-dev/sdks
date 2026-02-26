@@ -1,24 +1,37 @@
 [project]
 name = "openvip"
-version = "1.0.1"
-description = "Python SDK for the OpenVIP voice interaction protocol"
+version = "1.0.0"
+description = "Python SDK for the Open Voice Interaction Protocol (OpenVIP)"
 authors = [
-  {name = "dragfly"},
+  {name = "OpenVIP", email = "dev@openvip.dev"},
 ]
-license = "CC-BY-4.0"
+license = { text = "MIT" }
 readme = "README.md"
-keywords = ["openvip", "voice", "speech", "sdk", "sse", "voice-interaction"]
+keywords = ["openvip", "voice", "speech", "transcription", "stt", "tts"]
 requires-python = ">=3.9"
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Multimedia :: Sound/Audio :: Speech",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+]
 
 dependencies = [
-  "urllib3 (>=2.1.0,<3.0.0)",
-  "python-dateutil (>=2.8.2)",
-  "pydantic (>=2)",
-  "typing-extensions (>=4.7.1)",
+  "urllib3 >=2.1.0,<3.0.0",
+  "python-dateutil >=2.8.2",
+  "pydantic >=2.11",
+  "typing-extensions >=4.7.1",
 ]
 
 [project.urls]
-Homepage = "https://github.com/openvip-dev/sdks"
+Homepage = "https://openvip.dev"
 Repository = "https://github.com/openvip-dev/sdks"
 Issues = "https://github.com/openvip-dev/sdks/issues"
 

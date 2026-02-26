@@ -66,4 +66,47 @@ export class StatusApi extends runtime.BaseAPI {
         return await response.value();
     }
 
+    /**
+     * Creates request options for subscribeStatus without sending the request
+     */
+    async subscribeStatusRequestOpts(): Promise<runtime.RequestOpts> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/status/stream`;
+
+        return {
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        };
+    }
+
+    /**
+     * Server-Sent Events stream that pushes status updates on state transitions.  Events are sent when `state`, `connected_agents`, or other discrete fields change. Continuously changing fields (e.g., `uptime_seconds`) do not trigger events.  The payload of each event is a `Status` object — the same schema as the `GET /status` response.  Keepalive comments (`: keepalive`) are sent every 30 seconds if no events occur.  Clients that cannot use SSE should fall back to polling `GET /status`. 
+     * Subscribe to status changes (SSE)
+     */
+    async subscribeStatusRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
+        const requestOptions = await this.subscribeStatusRequestOpts();
+        const response = await this.request(requestOptions, initOverrides);
+
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<string>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
+    }
+
+    /**
+     * Server-Sent Events stream that pushes status updates on state transitions.  Events are sent when `state`, `connected_agents`, or other discrete fields change. Continuously changing fields (e.g., `uptime_seconds`) do not trigger events.  The payload of each event is a `Status` object — the same schema as the `GET /status` response.  Keepalive comments (`: keepalive`) are sent every 30 seconds if no events occur.  Clients that cannot use SSE should fall back to polling `GET /status`. 
+     * Subscribe to status changes (SSE)
+     */
+    async subscribeStatus(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
+        const response = await this.subscribeStatusRaw(initOverrides);
+        return await response.value();
+    }
+
 }

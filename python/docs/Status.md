@@ -7,6 +7,7 @@ Engine status
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **protocol_version** | **str** | Supported OpenVIP protocol version | [optional] 
+**state** | **str** | Current engine state | [optional] 
 **connected_agents** | **List[str]** | List of connected agent identifiers | [optional] 
 **platform** | **Dict[str, object]** | Implementation-specific details (opaque to protocol) | [optional] 
 

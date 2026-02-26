@@ -26,6 +26,12 @@ export interface Status {
      */
     protocolVersion?: string;
     /**
+     * Current engine state
+     * @type {string}
+     * @memberof Status
+     */
+    state?: string;
+    /**
      * List of connected agent identifiers
      * @type {Array<string>}
      * @memberof Status
@@ -57,6 +63,7 @@ export function StatusFromJSONTyped(json: any, ignoreDiscriminator: boolean): St
     return {
         
         'protocolVersion': json['protocol_version'] == null ? undefined : json['protocol_version'],
+        'state': json['state'] == null ? undefined : json['state'],
         'connectedAgents': json['connected_agents'] == null ? undefined : json['connected_agents'],
         'platform': json['platform'] == null ? undefined : json['platform'],
     };
@@ -74,6 +81,7 @@ export function StatusToJSONTyped(value?: Status | null, ignoreDiscriminator: bo
     return {
         
         'protocol_version': value['protocolVersion'],
+        'state': value['state'],
         'connected_agents': value['connectedAgents'],
         'platform': value['platform'],
     };

@@ -33,6 +33,13 @@ class TestStatusApi(unittest.TestCase):
         """
         pass
 
+    def test_subscribe_status(self) -> None:
+        """Test case for subscribe_status
+
+        Subscribe to status changes (SSE)
+        """
+        pass
+
 
 if __name__ == '__main__':
     unittest.main()

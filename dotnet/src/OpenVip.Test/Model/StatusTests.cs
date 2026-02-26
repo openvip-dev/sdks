@@ -63,6 +63,15 @@ namespace OpenVip.Test.Model
         }
 
         /// <summary>
+        /// Test the property 'State'
+        /// </summary>
+        [Fact]
+        public void StateTest()
+        {
+            // TODO unit test for the property 'State'
+        }
+
+        /// <summary>
         /// Test the property 'ConnectedAgents'
         /// </summary>
         [Fact]

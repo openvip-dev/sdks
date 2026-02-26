@@ -12,7 +12,6 @@ package openvip
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -29,6 +28,7 @@ type SpeechRequest struct {
 	Text string `json:"text"`
 	// BCP 47 language tag
 	Language *string `json:"language,omitempty" validate:"regexp=^[a-z]{2}(-[A-Z]{2})?$"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _SpeechRequest SpeechRequest
@@ -173,6 +173,11 @@ func (o SpeechRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Language) {
 		toSerialize["language"] = o.Language
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -202,15 +207,23 @@ func (o *SpeechRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varSpeechRequest := _SpeechRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varSpeechRequest)
+	err = json.Unmarshal(data, &varSpeechRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = SpeechRequest(varSpeechRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "openvip")
+		delete(additionalProperties, "type")
+		delete(additionalProperties, "text")
+		delete(additionalProperties, "language")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

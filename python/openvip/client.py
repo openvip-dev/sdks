@@ -11,6 +11,7 @@ from typing import Any, Callable, Iterator
 
 from openvip.messages import PROTOCOL_VERSION, create_speech_request
 from openvip.models.ack import Ack
+from openvip.models.speech_request import SpeechRequest
 from openvip.models.speech_response import SpeechResponse
 from openvip.models.status import Status
 from openvip.models.transcription import Transcription
@@ -40,17 +41,15 @@ class Client:
     """
 
     def __init__(
-        self, url: str = DEFAULT_URL, *, timeout: float = 10.0, token: str | None = None,
+        self, url: str = DEFAULT_URL, *, timeout: float = 10.0,
+        token: str | None = None,
     ) -> None:
         """Initialize client.
 
         Args:
             url: Base URL of the OpenVIP engine (default: http://localhost:8770).
             timeout: HTTP request timeout in seconds.
-            token: Optional authorization token.  When set, every request
-                includes an ``Authorization: Bearer <token>`` header.
-                Backward compatible — omitting token works against servers
-                that don't require authorization.
+            token: Optional Bearer token for authentication.
         """
         self.url = url.rstrip("/")
         self.timeout = timeout
@@ -154,7 +153,7 @@ class Client:
         stop: Callable[[], bool] | None = None,
         on_connect: Callable[[], None] | None = None,
         on_disconnect: Callable[[Exception | None], None] | None = None,
-    ) -> Iterator[Transcription]:
+    ) -> Iterator[Transcription | SpeechRequest]:
         """Subscribe to messages for an agent via SSE.
 
         This is a blocking iterator that yields messages as they arrive.
@@ -175,7 +174,7 @@ class Client:
                 the exception (or None for clean disconnect).
 
         Yields:
-            Transcription messages from the engine.
+            Transcription or SpeechRequest messages from the engine.
 
         Raises:
             DuplicateAgentError: If the agent ID is already connected (HTTP 409).
@@ -183,7 +182,7 @@ class Client:
         url = f"{self.url}/agents/{agent_id}/messages"
         yield from self._sse_stream(
             url,
-            Transcription.from_dict,
+            self._parse_agent_message,
             reconnect=reconnect,
             retry_delay=retry_delay,
             max_retry_delay=max_retry_delay,
@@ -237,6 +236,18 @@ class Client:
             on_disconnect=on_disconnect,
         )
 
+    # --- Message parsing ---
+
+    @staticmethod
+    def _parse_agent_message(
+        data: dict[str, Any],
+    ) -> Transcription | SpeechRequest:
+        """Parse an SSE message based on its type field."""
+        msg_type = data.get("type")
+        if msg_type == "speech":
+            return SpeechRequest.from_dict(data)
+        return Transcription.from_dict(data)
+
     # --- SSE helper ---
 
     def _sse_stream(
@@ -272,10 +283,10 @@ class Client:
 
         while True:
             try:
-                req = urllib.request.Request(
-                    url,
-                    headers={"Accept": "text/event-stream", **self._auth_headers()},
-                )
+                headers = {"Accept": "text/event-stream"}
+                if self._token:
+                    headers["Authorization"] = f"Bearer {self._token}"
+                req = urllib.request.Request(url, headers=headers)
                 with urllib.request.urlopen(req, timeout=None) as resp:
                     current_delay = retry_delay  # Reset on success
                     logger.debug("SSE connected: %s", url)
@@ -291,7 +302,13 @@ class Client:
                             try:
                                 data = json.loads(payload)
                                 yield parse(data)
-                            except (json.JSONDecodeError, Exception):
+                            except json.JSONDecodeError:
+                                continue
+                            except Exception:
+                                logger.debug(
+                                    "SSE parse error for %s: %s",
+                                    payload[:200], __import__("traceback").format_exc(),
+                                )
                                 continue
 
                 # Stream ended cleanly
@@ -304,11 +321,7 @@ class Client:
                 if e.code == 409:
                     msg = conflict_message or f"SSE conflict (409) for {url}"
                     raise DuplicateAgentError(msg) from e
-                # Other HTTP errors — 401 is handled gracefully in on_disconnect
-                if e.code == 401:
-                    logger.debug("SSE HTTP %d for %s (refreshing token)", e.code, url)
-                else:
-                    logger.warning("SSE HTTP %d for %s", e.code, url)
+                logger.warning("SSE HTTP %d for %s", e.code, url)
                 if on_disconnect:
                     on_disconnect(e)
                 if not reconnect:
@@ -337,24 +350,20 @@ class Client:
 
     # --- Internal HTTP helpers ---
 
-    def _auth_headers(self) -> dict[str, str]:
-        """Return authorization headers (empty dict if no token)."""
-        if self._token:
-            return {"Authorization": f"Bearer {self._token}"}
-        return {}
-
     def _get(self, path: str) -> dict[str, Any]:
         """GET request."""
-        req = urllib.request.Request(
-            f"{self.url}{path}", headers=self._auth_headers(),
-        )
+        req = urllib.request.Request(f"{self.url}{path}")
+        if self._token:
+            req.add_header("Authorization", f"Bearer {self._token}")
         with urllib.request.urlopen(req, timeout=self.timeout) as resp:
             return json.loads(resp.read())
 
     def _post(self, path: str, body: dict[str, Any]) -> dict[str, Any]:
         """POST request."""
         payload = json.dumps(body, default=str).encode()
-        headers = {"Content-Type": "application/json", **self._auth_headers()}
+        headers = {"Content-Type": "application/json"}
+        if self._token:
+            headers["Authorization"] = f"Bearer {self._token}"
         req = urllib.request.Request(
             f"{self.url}{path}",
             data=payload,

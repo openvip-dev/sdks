@@ -57,12 +57,45 @@ namespace OpenVip.Api
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IGetStatusApiResponse"/>?&gt;</returns>
         Task<IGetStatusApiResponse?> GetStatusOrDefaultAsync(System.Threading.CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Subscribe to status changes (SSE)
+        /// </summary>
+        /// <remarks>
+        /// Server-Sent Events stream that pushes status updates on state transitions.  Events are sent when &#x60;state&#x60;, &#x60;connected_agents&#x60;, or other discrete fields change. Continuously changing fields (e.g., &#x60;uptime_seconds&#x60;) do not trigger events.  The payload of each event is a &#x60;Status&#x60; object — the same schema as the &#x60;GET /status&#x60; response.  Keepalive comments (&#x60;: keepalive&#x60;) are sent every 30 seconds if no events occur.  Clients that cannot use SSE should fall back to polling &#x60;GET /status&#x60;. 
+        /// </remarks>
+        /// <exception cref="ApiException">Thrown when fails to make API call</exception>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns><see cref="Task"/>&lt;<see cref="ISubscribeStatusApiResponse"/>&gt;</returns>
+        Task<ISubscribeStatusApiResponse> SubscribeStatusAsync(System.Threading.CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Subscribe to status changes (SSE)
+        /// </summary>
+        /// <remarks>
+        /// Server-Sent Events stream that pushes status updates on state transitions.  Events are sent when &#x60;state&#x60;, &#x60;connected_agents&#x60;, or other discrete fields change. Continuously changing fields (e.g., &#x60;uptime_seconds&#x60;) do not trigger events.  The payload of each event is a &#x60;Status&#x60; object — the same schema as the &#x60;GET /status&#x60; response.  Keepalive comments (&#x60;: keepalive&#x60;) are sent every 30 seconds if no events occur.  Clients that cannot use SSE should fall back to polling &#x60;GET /status&#x60;. 
+        /// </remarks>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns><see cref="Task"/>&lt;<see cref="ISubscribeStatusApiResponse"/>?&gt;</returns>
+        Task<ISubscribeStatusApiResponse?> SubscribeStatusOrDefaultAsync(System.Threading.CancellationToken cancellationToken = default);
     }
 
     /// <summary>
     /// The <see cref="IGetStatusApiResponse"/>
     /// </summary>
     public interface IGetStatusApiResponse : OpenVip.Client.IApiResponse, IOk<OpenVip.Model.Status?>
+    {
+        /// <summary>
+        /// Returns true if the response is 200 Ok
+        /// </summary>
+        /// <returns></returns>
+        bool IsOk { get; }
+    }
+
+    /// <summary>
+    /// The <see cref="ISubscribeStatusApiResponse"/>
+    /// </summary>
+    public interface ISubscribeStatusApiResponse : OpenVip.Client.IApiResponse, IOk<string?>
     {
         /// <summary>
         /// Returns true if the response is 200 Ok
@@ -94,6 +127,26 @@ namespace OpenVip.Api
         internal void ExecuteOnErrorGetStatus(Exception exception)
         {
             OnErrorGetStatus?.Invoke(this, new ExceptionEventArgs(exception));
+        }
+
+        /// <summary>
+        /// The event raised after the server response
+        /// </summary>
+        public event EventHandler<ApiResponseEventArgs>? OnSubscribeStatus;
+
+        /// <summary>
+        /// The event raised after an error querying the server
+        /// </summary>
+        public event EventHandler<ExceptionEventArgs>? OnErrorSubscribeStatus;
+
+        internal void ExecuteOnSubscribeStatus(StatusApi.SubscribeStatusApiResponse apiResponse)
+        {
+            OnSubscribeStatus?.Invoke(this, new ApiResponseEventArgs(apiResponse));
+        }
+
+        internal void ExecuteOnErrorSubscribeStatus(Exception exception)
+        {
+            OnErrorSubscribeStatus?.Invoke(this, new ExceptionEventArgs(exception));
         }
     }
 
@@ -330,6 +383,224 @@ namespace OpenVip.Api
             /// <param name="result"></param>
             /// <returns></returns>
             public bool TryOk([NotNullWhen(true)]out OpenVip.Model.Status? result)
+            {
+                result = null;
+
+                try
+                {
+                    result = Ok();
+                } catch (Exception e)
+                {
+                    OnDeserializationErrorDefaultImplementation(e, (HttpStatusCode)200);
+                }
+
+                return result != null;
+            }
+
+            private void OnDeserializationErrorDefaultImplementation(Exception exception, HttpStatusCode httpStatusCode)
+            {
+                bool suppressDefaultLog = false;
+                OnDeserializationError(ref suppressDefaultLog, exception, httpStatusCode);
+                if (!suppressDefaultLog)
+                    Logger.LogError(exception, "An error occurred while deserializing the {code} response.", httpStatusCode);
+            }
+
+            partial void OnDeserializationError(ref bool suppressDefaultLog, Exception exception, HttpStatusCode httpStatusCode);
+        }
+
+        /// <summary>
+        /// Processes the server response
+        /// </summary>
+        /// <param name="apiResponseLocalVar"></param>
+        private void AfterSubscribeStatusDefaultImplementation(ISubscribeStatusApiResponse apiResponseLocalVar)
+        {
+            bool suppressDefaultLog = false;
+            AfterSubscribeStatus(ref suppressDefaultLog, apiResponseLocalVar);
+            if (!suppressDefaultLog)
+                Logger.LogInformation("{0,-9} | {1} | {2}", (apiResponseLocalVar.DownloadedAt - apiResponseLocalVar.RequestedAt).TotalSeconds, apiResponseLocalVar.StatusCode, apiResponseLocalVar.Path);
+        }
+
+        /// <summary>
+        /// Processes the server response
+        /// </summary>
+        /// <param name="suppressDefaultLog"></param>
+        /// <param name="apiResponseLocalVar"></param>
+        partial void AfterSubscribeStatus(ref bool suppressDefaultLog, ISubscribeStatusApiResponse apiResponseLocalVar);
+
+        /// <summary>
+        /// Logs exceptions that occur while retrieving the server response
+        /// </summary>
+        /// <param name="exceptionLocalVar"></param>
+        /// <param name="pathFormatLocalVar"></param>
+        /// <param name="pathLocalVar"></param>
+        private void OnErrorSubscribeStatusDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar)
+        {
+            bool suppressDefaultLogLocalVar = false;
+            OnErrorSubscribeStatus(ref suppressDefaultLogLocalVar, exceptionLocalVar, pathFormatLocalVar, pathLocalVar);
+            if (!suppressDefaultLogLocalVar)
+                Logger.LogError(exceptionLocalVar, "An error occurred while sending the request to the server.");
+        }
+
+        /// <summary>
+        /// A partial method that gives developers a way to provide customized exception handling
+        /// </summary>
+        /// <param name="suppressDefaultLogLocalVar"></param>
+        /// <param name="exceptionLocalVar"></param>
+        /// <param name="pathFormatLocalVar"></param>
+        /// <param name="pathLocalVar"></param>
+        partial void OnErrorSubscribeStatus(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar);
+
+        /// <summary>
+        /// Subscribe to status changes (SSE) Server-Sent Events stream that pushes status updates on state transitions.  Events are sent when &#x60;state&#x60;, &#x60;connected_agents&#x60;, or other discrete fields change. Continuously changing fields (e.g., &#x60;uptime_seconds&#x60;) do not trigger events.  The payload of each event is a &#x60;Status&#x60; object — the same schema as the &#x60;GET /status&#x60; response.  Keepalive comments (&#x60;: keepalive&#x60;) are sent every 30 seconds if no events occur.  Clients that cannot use SSE should fall back to polling &#x60;GET /status&#x60;. 
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns><see cref="Task"/>&lt;<see cref="ISubscribeStatusApiResponse"/>&gt;</returns>
+        public async Task<ISubscribeStatusApiResponse?> SubscribeStatusOrDefaultAsync(System.Threading.CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                return await SubscribeStatusAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Subscribe to status changes (SSE) Server-Sent Events stream that pushes status updates on state transitions.  Events are sent when &#x60;state&#x60;, &#x60;connected_agents&#x60;, or other discrete fields change. Continuously changing fields (e.g., &#x60;uptime_seconds&#x60;) do not trigger events.  The payload of each event is a &#x60;Status&#x60; object — the same schema as the &#x60;GET /status&#x60; response.  Keepalive comments (&#x60;: keepalive&#x60;) are sent every 30 seconds if no events occur.  Clients that cannot use SSE should fall back to polling &#x60;GET /status&#x60;. 
+        /// </summary>
+        /// <exception cref="ApiException">Thrown when fails to make API call</exception>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns><see cref="Task"/>&lt;<see cref="ISubscribeStatusApiResponse"/>&gt;</returns>
+        public async Task<ISubscribeStatusApiResponse> SubscribeStatusAsync(System.Threading.CancellationToken cancellationToken = default)
+        {
+            UriBuilder uriBuilderLocalVar = new UriBuilder();
+
+            try
+            {
+                using (HttpRequestMessage httpRequestMessageLocalVar = new HttpRequestMessage())
+                {
+                    uriBuilderLocalVar.Host = HttpClient.BaseAddress!.Host;
+                    uriBuilderLocalVar.Port = HttpClient.BaseAddress.Port;
+                    uriBuilderLocalVar.Scheme = HttpClient.BaseAddress.Scheme;
+                    uriBuilderLocalVar.Path = HttpClient.BaseAddress.AbsolutePath == "/"
+                        ? "/status/stream"
+                        : string.Concat(HttpClient.BaseAddress.AbsolutePath, "/status/stream");
+
+                    httpRequestMessageLocalVar.RequestUri = uriBuilderLocalVar.Uri;
+
+                    string[] acceptLocalVars = new string[] {
+                        "text/event-stream"
+                    };
+
+                    IEnumerable<MediaTypeWithQualityHeaderValue> acceptHeaderValuesLocalVar = ClientUtils.SelectHeaderAcceptArray(acceptLocalVars);
+
+                    foreach (var acceptLocalVar in acceptHeaderValuesLocalVar)
+                        httpRequestMessageLocalVar.Headers.Accept.Add(acceptLocalVar);
+
+                    httpRequestMessageLocalVar.Method = HttpMethod.Get;
+
+                    DateTime requestedAtLocalVar = DateTime.UtcNow;
+
+                    using (HttpResponseMessage httpResponseMessageLocalVar = await HttpClient.SendAsync(httpRequestMessageLocalVar, cancellationToken).ConfigureAwait(false))
+                    {
+                        ILogger<SubscribeStatusApiResponse> apiResponseLoggerLocalVar = LoggerFactory.CreateLogger<SubscribeStatusApiResponse>();
+                        SubscribeStatusApiResponse apiResponseLocalVar;
+
+                        switch ((int)httpResponseMessageLocalVar.StatusCode) {
+                            default: {
+                                string responseContentLocalVar = await httpResponseMessageLocalVar.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+                                apiResponseLocalVar = new(apiResponseLoggerLocalVar, httpRequestMessageLocalVar, httpResponseMessageLocalVar, responseContentLocalVar, "/status/stream", requestedAtLocalVar, _jsonSerializerOptions);
+
+                                break;
+                            }
+                        }
+
+                        AfterSubscribeStatusDefaultImplementation(apiResponseLocalVar);
+
+                        Events.ExecuteOnSubscribeStatus(apiResponseLocalVar);
+
+                        return apiResponseLocalVar;
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                OnErrorSubscribeStatusDefaultImplementation(e, "/status/stream", uriBuilderLocalVar.Path);
+                Events.ExecuteOnErrorSubscribeStatus(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// The <see cref="SubscribeStatusApiResponse"/>
+        /// </summary>
+        public partial class SubscribeStatusApiResponse : OpenVip.Client.ApiResponse, ISubscribeStatusApiResponse
+        {
+            /// <summary>
+            /// The logger
+            /// </summary>
+            public ILogger<SubscribeStatusApiResponse> Logger { get; }
+
+            /// <summary>
+            /// The <see cref="SubscribeStatusApiResponse"/>
+            /// </summary>
+            /// <param name="logger"></param>
+            /// <param name="httpRequestMessage"></param>
+            /// <param name="httpResponseMessage"></param>
+            /// <param name="rawContent"></param>
+            /// <param name="path"></param>
+            /// <param name="requestedAt"></param>
+            /// <param name="jsonSerializerOptions"></param>
+            public SubscribeStatusApiResponse(ILogger<SubscribeStatusApiResponse> logger, System.Net.Http.HttpRequestMessage httpRequestMessage, System.Net.Http.HttpResponseMessage httpResponseMessage, string rawContent, string path, DateTime requestedAt, System.Text.Json.JsonSerializerOptions jsonSerializerOptions) : base(httpRequestMessage, httpResponseMessage, rawContent, path, requestedAt, jsonSerializerOptions)
+            {
+                Logger = logger;
+                OnCreated(httpRequestMessage, httpResponseMessage);
+            }
+
+            /// <summary>
+            /// The <see cref="SubscribeStatusApiResponse"/>
+            /// </summary>
+            /// <param name="logger"></param>
+            /// <param name="httpRequestMessage"></param>
+            /// <param name="httpResponseMessage"></param>
+            /// <param name="contentStream"></param>
+            /// <param name="path"></param>
+            /// <param name="requestedAt"></param>
+            /// <param name="jsonSerializerOptions"></param>
+            public SubscribeStatusApiResponse(ILogger<SubscribeStatusApiResponse> logger, System.Net.Http.HttpRequestMessage httpRequestMessage, System.Net.Http.HttpResponseMessage httpResponseMessage, System.IO.Stream contentStream, string path, DateTime requestedAt, System.Text.Json.JsonSerializerOptions jsonSerializerOptions) : base(httpRequestMessage, httpResponseMessage, contentStream, path, requestedAt, jsonSerializerOptions)
+            {
+                Logger = logger;
+                OnCreated(httpRequestMessage, httpResponseMessage);
+            }
+
+            partial void OnCreated(global::System.Net.Http.HttpRequestMessage httpRequestMessage, System.Net.Http.HttpResponseMessage httpResponseMessage);
+
+            /// <summary>
+            /// Returns true if the response is 200 Ok
+            /// </summary>
+            /// <returns></returns>
+            public bool IsOk => 200 == (int)StatusCode;
+
+            /// <summary>
+            /// Deserializes the response if the response is 200 Ok
+            /// </summary>
+            /// <returns></returns>
+            public string? Ok()
+            {
+                // This logic may be modified with the AsModel.mustache template
+                return IsOk
+                    ? System.Text.Json.JsonSerializer.Deserialize<string>(RawContent, _jsonSerializerOptions)
+                    : null;
+            }
+
+            /// <summary>
+            /// Returns true if the response is 200 Ok and the deserialized response is not null
+            /// </summary>
+            /// <param name="result"></param>
+            /// <returns></returns>
+            public bool TryOk([NotNullWhen(true)]out string? result)
             {
                 result = null;
 

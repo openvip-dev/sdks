@@ -36,6 +36,7 @@ class TestStatus(unittest.TestCase):
         if include_optional:
             return Status(
                 protocol_version = '1.0',
+                state = 'listening',
                 connected_agents = [
                     ''
                     ],

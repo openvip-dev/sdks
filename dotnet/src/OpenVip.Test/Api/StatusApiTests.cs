@@ -60,5 +60,16 @@ namespace OpenVip.Test.Api
             var model = response.Ok();
             Assert.IsType<Status>(model);
         }
+
+        /// <summary>
+        /// Test SubscribeStatus
+        /// </summary>
+        [Fact (Skip = "not implemented")]
+        public async Task SubscribeStatusAsyncTest()
+        {
+            var response = await _instance.SubscribeStatusAsync();
+            var model = response.Ok();
+            Assert.IsType<string>(model);
+        }
     }
 }
