@@ -40,14 +40,9 @@ openvip/models/status_tts.py
 openvip/models/transcription.py
 openvip/py.typed
 openvip/rest.py
-pyproject.toml
 requirements.txt
 setup.cfg
 setup.py
 test-requirements.txt
 test/__init__.py
-test/test_message.py
-test/test_response.py
-test/test_status_stt.py
-test/test_status_tts.py
 tox.ini

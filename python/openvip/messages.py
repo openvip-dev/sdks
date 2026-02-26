@@ -61,12 +61,14 @@ def create_speech_request(
     text: str,
     *,
     language: str | None = None,
+    voice: str | None = None,
 ) -> SpeechRequest:
     """Create a SpeechRequest with auto-filled protocol fields.
 
     Args:
         text: Text to synthesize.
         language: BCP 47 language tag (e.g. "en", "it").
+        voice: Voice identifier, engine-specific (e.g. "af_sky" for Kokoro).
 
     Returns:
         SpeechRequest with protocol version auto-filled.
@@ -78,4 +80,5 @@ def create_speech_request(
         timestamp=datetime.now(timezone.utc),
         text=text,
         language=language,
+        voice=voice,
     )

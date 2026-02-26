@@ -87,12 +87,21 @@ class TestCreateSpeechRequest:
         req = create_speech_request("test")
         assert req.language is None
 
+    def test_voice(self):
+        req = create_speech_request("hello", voice="af_sky")
+        assert req.voice == "af_sky"
+
+    def test_no_voice(self):
+        req = create_speech_request("test")
+        assert req.voice is None
+
     def test_to_dict(self):
-        req = create_speech_request("hello", language="en")
+        req = create_speech_request("hello", language="en", voice="af_sky")
         d = req.to_dict()
         assert d["openvip"] == PROTOCOL_VERSION
         assert d["type"] == "speech"
         assert d["text"] == "hello"
         assert d["language"] == "en"
+        assert d["voice"] == "af_sky"
         assert "id" in d
         assert "timestamp" in d

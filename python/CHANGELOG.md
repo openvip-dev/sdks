@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.0rc4] - 2026-02-26
+
+### Added
+- `SpeechRequest` now includes `voice` field (optional, engine-specific voice
+  identifier, e.g. `"af_sky"` for Kokoro). Spec updated in `openapi.yaml` and
+  `openvip-1.0.md`; SDK regenerated.
+- `create_speech_request()` accepts `voice` parameter.
+
 ## [1.0.0rc3] - 2026-02-26
 
 ### Fixed

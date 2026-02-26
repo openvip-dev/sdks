@@ -15,6 +15,7 @@ Name | Type | Description | Notes
 **language** | **str** | BCP 47 language tag | [optional] 
 **trace_id** | **UUID** | ID of the original message (OpenTelemetry-style) | [optional] 
 **parent_id** | **UUID** | ID of the parent message (OpenTelemetry-style) | [optional] 
+**voice** | **str** | Voice identifier (engine-specific, e.g. \&quot;af_sky\&quot; for Kokoro) | [optional] 
 
 ## Example
 

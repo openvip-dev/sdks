@@ -38,7 +38,8 @@ class SpeechRequest(BaseModel):
     language: Optional[Annotated[str, Field(strict=True)]] = Field(default=None, description="BCP 47 language tag")
     trace_id: Optional[UUID] = Field(default=None, description="ID of the original message (OpenTelemetry-style)")
     parent_id: Optional[UUID] = Field(default=None, description="ID of the parent message (OpenTelemetry-style)")
-    __properties: ClassVar[List[str]] = ["openvip", "type", "id", "timestamp", "text", "origin", "language", "trace_id", "parent_id"]
+    voice: Optional[StrictStr] = Field(default=None, description="Voice identifier (engine-specific, e.g. \"af_sky\" for Kokoro)")
+    __properties: ClassVar[List[str]] = ["openvip", "type", "id", "timestamp", "text", "origin", "language", "trace_id", "parent_id", "voice"]
 
     @field_validator('openvip')
     def openvip_validate_enum(cls, value):
@@ -124,7 +125,8 @@ class SpeechRequest(BaseModel):
             "origin": obj.get("origin"),
             "language": obj.get("language"),
             "trace_id": obj.get("trace_id"),
-            "parent_id": obj.get("parent_id")
+            "parent_id": obj.get("parent_id"),
+            "voice": obj.get("voice")
         })
         return _obj
 

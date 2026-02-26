@@ -326,6 +326,10 @@ components:
             type:
               type: string
               enum: [speech]
+            voice:
+              type: string
+              description: Voice identifier (engine-specific, e.g. "af_sky" for Kokoro)
+              example: "af_sky"
 
     SpeechResponse:
       type: object
