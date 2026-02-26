@@ -115,6 +115,7 @@ Class | Method | HTTP request | Description
 *ControlApi* | [**send_control**](docs/ControlApi.md#send_control) | **POST** /control | Send control command
 *MessagesApi* | [**send_message**](docs/MessagesApi.md#send_message) | **POST** /agents/{agent_id}/messages | Send message to agent
 *MessagesApi* | [**subscribe_agent**](docs/MessagesApi.md#subscribe_agent) | **GET** /agents/{agent_id}/messages | Subscribe to agent messages (SSE)
+*SpeechApi* | [**stop_speech**](docs/SpeechApi.md#stop_speech) | **POST** /speech/stop | Stop TTS playback
 *SpeechApi* | [**text_to_speech**](docs/SpeechApi.md#text_to_speech) | **POST** /speech | Text-to-speech request
 *StatusApi* | [**get_status**](docs/StatusApi.md#get_status) | **GET** /status | Get engine status
 *StatusApi* | [**subscribe_status**](docs/StatusApi.md#subscribe_status) | **GET** /status/stream | Subscribe to status changes (SSE)
@@ -122,6 +123,7 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [Ack](docs/Ack.md)
  - [ControlRequest](docs/ControlRequest.md)
  - [Error](docs/Error.md)
  - [Message](docs/Message.md)

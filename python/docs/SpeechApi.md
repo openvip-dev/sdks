@@ -4,8 +4,75 @@ All URIs are relative to *http://localhost:8770*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**stop_speech**](SpeechApi.md#stop_speech) | **POST** /speech/stop | Stop TTS playback
 [**text_to_speech**](SpeechApi.md#text_to_speech) | **POST** /speech | Text-to-speech request
 
+
+# **stop_speech**
+> Ack stop_speech()
+
+Stop TTS playback
+
+Interrupt the currently playing TTS audio immediately.
+If no audio is playing, the request is a no-op (still returns 200).
+
+
+### Example
+
+
+```python
+import openvip
+from openvip.models.ack import Ack
+from openvip.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8770
+# See configuration.py for a list of all supported configuration parameters.
+configuration = openvip.Configuration(
+    host = "http://localhost:8770"
+)
+
+
+# Enter a context with an instance of the API client
+with openvip.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = openvip.SpeechApi(api_client)
+
+    try:
+        # Stop TTS playback
+        api_response = api_instance.stop_speech()
+        print("The response of SpeechApi->stop_speech:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling SpeechApi->stop_speech: %s\n" % e)
+```
+
+
+
+### Parameters
+
+This endpoint does not need any parameter.
+
+### Return type
+
+[**Ack**](Ack.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Stop request delivered (audio may already be finished) |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **text_to_speech**
 > SpeechResponse text_to_speech(speech_request)

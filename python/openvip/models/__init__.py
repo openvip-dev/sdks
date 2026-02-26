@@ -13,6 +13,7 @@
 """  # noqa: E501
 
 # import models into model package
+from openvip.models.ack import Ack
 from openvip.models.control_request import ControlRequest
 from openvip.models.error import Error
 from openvip.models.message import Message

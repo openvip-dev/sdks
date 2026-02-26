@@ -3,6 +3,7 @@
 .gitlab-ci.yml
 .travis.yml
 README.md
+docs/Ack.md
 docs/ControlApi.md
 docs/ControlRequest.md
 docs/Error.md
@@ -28,6 +29,7 @@ openvip/api_response.py
 openvip/configuration.py
 openvip/exceptions.py
 openvip/models/__init__.py
+openvip/models/ack.py
 openvip/models/control_request.py
 openvip/models/error.py
 openvip/models/message.py
