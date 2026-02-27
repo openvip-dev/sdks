@@ -34,6 +34,7 @@ class StatusTts(BaseModel):
         validate_by_alias=True,
         validate_assignment=True,
         protected_namespaces=(),
+        extra="allow",
     )
 
 
@@ -80,9 +81,7 @@ class StatusTts(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "enabled": obj.get("enabled")
-        })
+        _obj = cls.model_validate(obj)
         return _obj
 
 

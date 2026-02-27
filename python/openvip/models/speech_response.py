@@ -53,6 +53,7 @@ class SpeechResponse(BaseModel):
         validate_by_alias=True,
         validate_assignment=True,
         protected_namespaces=(),
+        extra="allow",
     )
 
 
@@ -99,13 +100,7 @@ class SpeechResponse(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "openvip": obj.get("openvip"),
-            "status": obj.get("status"),
-            "duration_ms": obj.get("duration_ms"),
-            "id": obj.get("id"),
-            "ref": obj.get("ref")
-        })
+        _obj = cls.model_validate(obj)
         return _obj
 
 

@@ -78,6 +78,8 @@ clean_generated() {
                    "$SCRIPT_DIR/python/openvip/api" \
                    "$SCRIPT_DIR/python/test" \
                    "$SCRIPT_DIR/python/docs"
+            # Remove auto-generated setup.py/setup.cfg — version comes from pyproject.toml
+            rm -f "$SCRIPT_DIR/python/setup.py" "$SCRIPT_DIR/python/setup.cfg"
             ;;
         dotnet)
             rm -rf "$SCRIPT_DIR/dotnet/src" "$SCRIPT_DIR/dotnet/docs"
@@ -114,6 +116,12 @@ generate() {
         -o "/local/$lang" \
         --package-name "$package" \
         $extra
+
+    # Post-process Pydantic models (Python only)
+    if [[ "$lang" == "python" ]]; then
+        echo "  Patching Pydantic models (extra='allow' + from_dict pass-through)..."
+        python3 "$SCRIPT_DIR/patch_pydantic_models.py" "$SCRIPT_DIR/python/openvip/models"
+    fi
 
     echo "  → $lang/"
 }

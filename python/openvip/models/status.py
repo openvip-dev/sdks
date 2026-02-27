@@ -47,6 +47,7 @@ class Status(BaseModel):
         validate_by_alias=True,
         validate_assignment=True,
         protected_namespaces=(),
+        extra="allow",
     )
 
 
@@ -99,13 +100,7 @@ class Status(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "openvip": obj.get("openvip"),
-            "stt": StatusStt.from_dict(obj["stt"]) if obj.get("stt") is not None else None,
-            "tts": StatusTts.from_dict(obj["tts"]) if obj.get("tts") is not None else None,
-            "connected_agents": obj.get("connected_agents"),
-            "platform": obj.get("platform")
-        })
+        _obj = cls.model_validate(obj)
         return _obj
 
 

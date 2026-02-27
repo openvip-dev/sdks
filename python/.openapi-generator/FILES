@@ -41,8 +41,6 @@ openvip/models/transcription.py
 openvip/py.typed
 openvip/rest.py
 requirements.txt
-setup.cfg
-setup.py
 test-requirements.txt
 test/__init__.py
 test/test_control_api.py

@@ -51,6 +51,7 @@ class ControlRequest(BaseModel):
         validate_by_alias=True,
         validate_assignment=True,
         protected_namespaces=(),
+        extra="allow",
     )
 
 
@@ -97,11 +98,7 @@ class ControlRequest(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "openvip": obj.get("openvip"),
-            "id": obj.get("id"),
-            "command": obj.get("command")
-        })
+        _obj = cls.model_validate(obj)
         return _obj
 
 

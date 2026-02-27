@@ -35,6 +35,7 @@ class StatusStt(BaseModel):
         validate_by_alias=True,
         validate_assignment=True,
         protected_namespaces=(),
+        extra="allow",
     )
 
 
@@ -81,10 +82,7 @@ class StatusStt(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "enabled": obj.get("enabled"),
-            "active": obj.get("active")
-        })
+        _obj = cls.model_validate(obj)
         return _obj
 
 

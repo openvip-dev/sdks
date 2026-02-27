@@ -56,6 +56,7 @@ class Error(BaseModel):
         validate_by_alias=True,
         validate_assignment=True,
         protected_namespaces=(),
+        extra="allow",
     )
 
 
@@ -102,13 +103,7 @@ class Error(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "openvip": obj.get("openvip"),
-            "error": obj.get("error"),
-            "code": obj.get("code"),
-            "id": obj.get("id"),
-            "ref": obj.get("ref")
-        })
+        _obj = cls.model_validate(obj)
         return _obj
 
 

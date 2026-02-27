@@ -70,6 +70,7 @@ class SpeechRequest(BaseModel):
         validate_by_alias=True,
         validate_assignment=True,
         protected_namespaces=(),
+        extra="allow",
     )
 
 
@@ -116,18 +117,7 @@ class SpeechRequest(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "openvip": obj.get("openvip"),
-            "type": obj.get("type"),
-            "id": obj.get("id"),
-            "timestamp": obj.get("timestamp"),
-            "text": obj.get("text"),
-            "origin": obj.get("origin"),
-            "language": obj.get("language"),
-            "trace_id": obj.get("trace_id"),
-            "parent_id": obj.get("parent_id"),
-            "voice": obj.get("voice")
-        })
+        _obj = cls.model_validate(obj)
         return _obj
 
 

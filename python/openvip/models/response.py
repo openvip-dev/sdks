@@ -52,6 +52,7 @@ class Response(BaseModel):
         validate_by_alias=True,
         validate_assignment=True,
         protected_namespaces=(),
+        extra="allow",
     )
 
 
@@ -98,12 +99,7 @@ class Response(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "openvip": obj.get("openvip"),
-            "status": obj.get("status"),
-            "id": obj.get("id"),
-            "ref": obj.get("ref")
-        })
+        _obj = cls.model_validate(obj)
         return _obj
 
 

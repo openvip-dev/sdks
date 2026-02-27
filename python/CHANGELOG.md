@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.0.0rc7] - 2026-02-27
+
+### Fixed
+- Extension fields (x_input, x_agent_switch, any x_*) are now preserved through
+  `from_dict()` → `to_dict()` round-trips. Previously, regenerating the SDK with
+  openapi-generator produced strict Pydantic v2 models that silently dropped
+  unknown fields — breaking ALL extension-based features.
+- Root causes fixed:
+  - Added `extra="allow"` to all model `ConfigDict` (Pydantic preserves unknown fields)
+  - Simplified `from_dict()` to pass the full dict instead of cherry-picking known fields
+  - Removed `setup.py` / `setup.cfg` (auto-generated, hardcoded `VERSION = "1.0.0"`
+    which overrode `pyproject.toml` version during builds)
+
+### Added
+- `patch_pydantic_models.py`: post-processing script run automatically by
+  `generate.sh` after Python SDK generation. Patches all models for extension
+  field support.
+- `tests/test_models.py`: 9 regression tests verifying extension fields survive
+  `from_dict()` → `to_dict()` on Transcription, SpeechRequest, and Response.
+
+## [1.0.0rc6] - 2026-02-26
+
+### Fixed
+- Removed `Ack` schema — all endpoints now return `Response` (proper
+  request/response semantics instead of protocol-level ack).
+- `generate.sh`: added `clean_generated()` pre-clean step to remove orphan files
+  (e.g. `ack.py`) that survive spec changes.
+
+### Added
+- `Client.stop_speech()` — POST /speech/stop to interrupt TTS playback.
+
 ## [1.0.0rc4] - 2026-02-26
 
 ### Added
