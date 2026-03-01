@@ -13,7 +13,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 
 # Default spec URL
-DEFAULT_SPEC="https://raw.githubusercontent.com/open-voice-input/spec/main/bindings/http/openapi.yaml"
+DEFAULT_SPEC="https://raw.githubusercontent.com/openvip-dev/protocol/main/bindings/http/openapi.yaml"
 
 # Parse arguments
 SPEC="${1:-$DEFAULT_SPEC}"
