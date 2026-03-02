@@ -1,0 +1,67 @@
+name: Regenerate SDK from protocol
+
+on:
+  workflow_dispatch:
+    inputs:
+      spec_ref:
+        description: "Branch or tag of openvip-dev/protocol to use (default: main)"
+        required: false
+        default: "main"
+
+jobs:
+  regenerate:
+    name: Regenerate & commit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install patch dependencies
+        run: pip install pydantic
+
+      - name: Download spec
+        run: |
+          SPEC_URL="https://raw.githubusercontent.com/openvip-dev/protocol/${{ inputs.spec_ref }}/bindings/http/openapi.yaml"
+          echo "Downloading spec from: $SPEC_URL"
+          curl -fsSL "$SPEC_URL" -o .openapi-spec.yaml
+
+      - name: Generate Python SDK
+        run: |
+          docker run --rm \
+            -v "$PWD:/local" \
+            openapitools/openapi-generator-cli:latest generate \
+            -i /local/.openapi-spec.yaml \
+            -g python \
+            -o /local/python \
+            --package-name openvip
+
+      - name: Patch Pydantic models
+        run: python patch_pydantic_models.py python/openvip/models
+
+      - name: Copy spec snapshot
+        run: cp .openapi-spec.yaml openapi.yaml
+
+      - name: Cleanup temp spec
+        run: rm -f .openapi-spec.yaml
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            SPEC_REF="${{ inputs.spec_ref }}"
+            git commit -m "chore: regenerate SDK from protocol@${SPEC_REF}"
+            git push
+          fi
