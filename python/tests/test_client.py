@@ -25,7 +25,7 @@ def _mock_response(data: dict) -> MagicMock:
 class TestClientInit:
     def test_default_url(self):
         c = Client()
-        assert c.url == "http://localhost:8770"
+        assert c.url == "http://localhost:8770/openvip"
 
     def test_custom_url(self):
         c = Client("http://myhost:9999")

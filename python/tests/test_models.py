@@ -62,16 +62,16 @@ class TestExtensionFieldsRoundTrip:
     """
 
     def test_transcription_x_input_newline(self):
-        data = _transcription_dict(x_input={"newline": True})
+        data = _transcription_dict(x_input={"ops": ["newline"]})
         t = Transcription.from_dict(data)
-        assert t.x_input == {"newline": True}
-        assert t.to_dict()["x_input"] == {"newline": True}
+        assert t.x_input.ops == ["newline"]
+        assert t.to_dict()["x_input"]["ops"] == ["newline"]
 
     def test_transcription_x_input_submit(self):
-        data = _transcription_dict(x_input={"submit": True})
+        data = _transcription_dict(x_input={"ops": ["submit"]})
         t = Transcription.from_dict(data)
-        assert t.x_input == {"submit": True}
-        assert t.to_dict()["x_input"] == {"submit": True}
+        assert t.x_input.ops == ["submit"]
+        assert t.to_dict()["x_input"]["ops"] == ["submit"]
 
     def test_speech_request_extra_field(self):
         data = _speech_request_dict(x_custom={"key": "value"})
@@ -87,14 +87,14 @@ class TestExtensionFieldsRoundTrip:
 
     def test_multiple_extra_fields(self):
         data = _transcription_dict(
-            x_input={"newline": True},
+            x_input={"ops": ["newline"]},
             x_flags={"urgent": True},
         )
         t = Transcription.from_dict(data)
-        assert t.x_input == {"newline": True}
+        assert t.x_input.ops == ["newline"]
         assert t.x_flags == {"urgent": True}
         d = t.to_dict()
-        assert d["x_input"] == {"newline": True}
+        assert d["x_input"]["ops"] == ["newline"]
         assert d["x_flags"] == {"urgent": True}
 
     def test_scalar_extra_field(self):
@@ -120,9 +120,9 @@ class TestModelValidateExtras:
     """Verify extra fields work via model_validate (not just from_dict)."""
 
     def test_transcription_model_validate(self):
-        data = _transcription_dict(x_input={"submit": True})
+        data = _transcription_dict(x_input={"ops": ["submit"]})
         t = Transcription.model_validate(data)
-        assert t.x_input == {"submit": True}
+        assert t.x_input.ops == ["submit"]
 
     def test_speech_request_model_validate(self):
         data = _speech_request_dict(x_priority="high")
