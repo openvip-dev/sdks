@@ -1,13 +1,12 @@
 # MessageXInput
 
-Standard extension: text input behavior
+Standard extension: text input behavior. ops is an ordered list of input operations to perform.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**submit** | **bool** | If true, submit/send the text (e.g., press Enter) | 
-**newline** | **bool** | If true, insert a line break (e.g., Shift+Enter) | 
+**ops** | **List[str]** | Ordered list of input operations to perform | 
 **trigger** | **str** | The voice phrase that triggered this action | [optional] 
 **confidence** | **float** | Confidence score for the trigger (0.0–1.0) | [optional] 
 **source** | **str** | Generator identifier — free-form string identifying the component that produced this extension | [optional] 
