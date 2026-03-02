@@ -16,7 +16,7 @@ from openvip.models.speech_response import SpeechResponse
 from openvip.models.status import Status
 from openvip.models.transcription import Transcription
 
-DEFAULT_URL = "http://localhost:8770"
+DEFAULT_URL = "http://localhost:8770/openvip"
 
 logger = logging.getLogger(__name__)
 
