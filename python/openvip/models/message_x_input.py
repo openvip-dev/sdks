@@ -17,57 +17,22 @@ import pprint
 import re  # noqa: F401
 import json
 
-from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
-from typing import Any, ClassVar, Dict, List, Optional
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing_extensions import Annotated
-from uuid import UUID
-from openvip.models.message_x_agent_switch import MessageXAgentSwitch
-from openvip.models.message_x_input import MessageXInput
 from typing import Optional, Set
 from typing_extensions import Self
 
-class SpeechRequest(BaseModel):
+class MessageXInput(BaseModel):
     """
-    Text-to-speech request
+    Standard extension: text input behavior
     """ # noqa: E501
-    openvip: StrictStr = Field(description="Protocol version")
-    type: StrictStr
-    id: UUID = Field(description="Unique message identifier")
-    timestamp: datetime = Field(description="ISO 8601 timestamp")
-    text: StrictStr = Field(description="Message text content")
-    origin: Optional[StrictStr] = Field(default=None, description="Producer identifier")
-    language: Optional[Annotated[str, Field(strict=True)]] = Field(default=None, description="BCP 47 language tag")
-    trace_id: Optional[UUID] = Field(default=None, description="ID of the original message (OpenTelemetry-style)")
-    parent_id: Optional[UUID] = Field(default=None, description="ID of the parent message (OpenTelemetry-style)")
-    x_input: Optional[MessageXInput] = None
-    x_agent_switch: Optional[MessageXAgentSwitch] = None
-    voice: Optional[StrictStr] = Field(default=None, description="Voice identifier (engine-specific, e.g. \"af_sky\" for Kokoro)")
-    __properties: ClassVar[List[str]] = ["openvip", "type", "id", "timestamp", "text", "origin", "language", "trace_id", "parent_id", "x_input", "x_agent_switch", "voice"]
-
-    @field_validator('openvip')
-    def openvip_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['1.0']):
-            raise ValueError("must be one of enum values ('1.0')")
-        return value
-
-    @field_validator('type')
-    def type_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['speech']):
-            raise ValueError("must be one of enum values ('speech')")
-        return value
-
-    @field_validator('language')
-    def language_validate_regular_expression(cls, value):
-        """Validates the regular expression"""
-        if value is None:
-            return value
-
-        if not re.match(r"^[a-z]{2}(-[A-Z]{2})?$", value):
-            raise ValueError(r"must validate the regular expression /^[a-z]{2}(-[A-Z]{2})?$/")
-        return value
+    submit: StrictBool = Field(description="If true, submit/send the text (e.g., press Enter)")
+    newline: StrictBool = Field(description="If true, insert a line break (e.g., Shift+Enter)")
+    trigger: Optional[StrictStr] = Field(default=None, description="The voice phrase that triggered this action")
+    confidence: Optional[Union[Annotated[float, Field(le=1, strict=True, ge=0)], Annotated[int, Field(le=1, strict=True, ge=0)]]] = Field(default=None, description="Confidence score for the trigger (0.0–1.0)")
+    source: Optional[StrictStr] = Field(default=None, description="Generator identifier — free-form string identifying the component that produced this extension")
+    __properties: ClassVar[List[str]] = ["submit", "newline", "trigger", "confidence", "source"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -89,7 +54,7 @@ class SpeechRequest(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of SpeechRequest from a JSON string"""
+        """Create an instance of MessageXInput from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -110,17 +75,11 @@ class SpeechRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of x_input
-        if self.x_input:
-            _dict['x_input'] = self.x_input.to_dict()
-        # override the default output from pydantic by calling `to_dict()` of x_agent_switch
-        if self.x_agent_switch:
-            _dict['x_agent_switch'] = self.x_agent_switch.to_dict()
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of SpeechRequest from a dict"""
+        """Create an instance of MessageXInput from a dict"""
         if obj is None:
             return None
 

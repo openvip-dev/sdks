@@ -3,19 +3,28 @@ Open Voice Interaction Protocol (OpenVIP) HTTP API specification.
 
 This API allows applications to send and receive voice interaction messages.
 
+## Base Path
+
+The OpenVIP protocol defines **relative paths** only. The base path is
+**implementation-defined** — implementations choose where to mount these
+endpoints. The recommended base path is `/openvip/`.
+
+Implementations SHOULD serve this OpenAPI spec at `{base_path}/openapi.json`
+for discovery (e.g. `GET /openvip/openapi.json`).
+
 ## Quick Start
 
 ```bash
 # Subscribe to messages (SSE) — this IS the registration
-curl http://localhost:8770/agents/my-agent-id/messages
+curl http://localhost:8770/openvip/agents/my-agent-id/messages
 
 # Send a message to an agent
-curl -X POST http://localhost:8770/agents/my-agent-id/messages \\
+curl -X POST http://localhost:8770/openvip/agents/my-agent-id/messages \\
   -H \"Content-Type: application/json\" \\
   -d '{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}'
 
 # Text-to-speech
-curl -X POST http://localhost:8770/speech \\
+curl -X POST http://localhost:8770/openvip/speech \\
   -H \"Content-Type: application/json\" \\
   -d '{\"openvip\": \"1.0\", \"type\": \"speech\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:05Z\", \"text\": \"hello world\", \"language\": \"en\"}'
 ```
@@ -82,10 +91,10 @@ import openvip
 from openvip.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost:8770
+# Defining the host is optional and defaults to http://localhost:8770/openvip
 # See configuration.py for a list of all supported configuration parameters.
 configuration = openvip.Configuration(
-    host = "http://localhost:8770"
+    host = "http://localhost:8770/openvip"
 )
 
 
@@ -108,7 +117,7 @@ with openvip.ApiClient(configuration) as api_client:
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *http://localhost:8770*
+All URIs are relative to *http://localhost:8770/openvip*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
@@ -126,6 +135,8 @@ Class | Method | HTTP request | Description
  - [ControlRequest](docs/ControlRequest.md)
  - [Error](docs/Error.md)
  - [Message](docs/Message.md)
+ - [MessageXAgentSwitch](docs/MessageXAgentSwitch.md)
+ - [MessageXInput](docs/MessageXInput.md)
  - [Response](docs/Response.md)
  - [SpeechRequest](docs/SpeechRequest.md)
  - [SpeechResponse](docs/SpeechResponse.md)

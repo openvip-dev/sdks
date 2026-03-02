@@ -14,10 +14,10 @@
 
 import unittest
 
-from openvip.models.speech_response import SpeechResponse
+from openvip.models.message_x_agent_switch import MessageXAgentSwitch
 
-class TestSpeechResponse(unittest.TestCase):
-    """SpeechResponse unit test stubs"""
+class TestMessageXAgentSwitch(unittest.TestCase):
+    """MessageXAgentSwitch unit test stubs"""
 
     def setUp(self):
         pass
@@ -25,31 +25,28 @@ class TestSpeechResponse(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def make_instance(self, include_optional) -> SpeechResponse:
-        """Test SpeechResponse
+    def make_instance(self, include_optional) -> MessageXAgentSwitch:
+        """Test MessageXAgentSwitch
             include_optional is a boolean, when False only required
             params are included, when True both required and
             optional params are included """
-        # uncomment below to create an instance of `SpeechResponse`
+        # uncomment below to create an instance of `MessageXAgentSwitch`
         """
-        model = SpeechResponse()
+        model = MessageXAgentSwitch()
         if include_optional:
-            return SpeechResponse(
-                openvip = '1.0',
-                status = 'ok',
-                duration_ms = 56,
-                id = '',
-                ref = ''
+            return MessageXAgentSwitch(
+                target = '',
+                confidence = 0,
+                source = ''
             )
         else:
-            return SpeechResponse(
-                openvip = '1.0',
-                status = 'ok',
+            return MessageXAgentSwitch(
+                target = '',
         )
         """
 
-    def testSpeechResponse(self):
-        """Test SpeechResponse"""
+    def testMessageXAgentSwitch(self):
+        """Test MessageXAgentSwitch"""
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 

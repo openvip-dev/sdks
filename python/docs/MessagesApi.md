@@ -1,6 +1,6 @@
 # openvip.MessagesApi
 
-All URIs are relative to *http://localhost:8770*
+All URIs are relative to *http://localhost:8770/openvip*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -27,10 +27,10 @@ from openvip.models.response import Response
 from openvip.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost:8770
+# Defining the host is optional and defaults to http://localhost:8770/openvip
 # See configuration.py for a list of all supported configuration parameters.
 configuration = openvip.Configuration(
-    host = "http://localhost:8770"
+    host = "http://localhost:8770/openvip"
 )
 
 
@@ -108,10 +108,10 @@ import openvip
 from openvip.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost:8770
+# Defining the host is optional and defaults to http://localhost:8770/openvip
 # See configuration.py for a list of all supported configuration parameters.
 configuration = openvip.Configuration(
-    host = "http://localhost:8770"
+    host = "http://localhost:8770/openvip"
 )
 
 

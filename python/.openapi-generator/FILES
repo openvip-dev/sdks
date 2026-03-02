@@ -7,6 +7,8 @@ docs/ControlApi.md
 docs/ControlRequest.md
 docs/Error.md
 docs/Message.md
+docs/MessageXAgentSwitch.md
+docs/MessageXInput.md
 docs/MessagesApi.md
 docs/Response.md
 docs/SpeechApi.md
@@ -31,6 +33,8 @@ openvip/models/__init__.py
 openvip/models/control_request.py
 openvip/models/error.py
 openvip/models/message.py
+openvip/models/message_x_agent_switch.py
+openvip/models/message_x_input.py
 openvip/models/response.py
 openvip/models/speech_request.py
 openvip/models/speech_response.py
@@ -47,6 +51,8 @@ test/test_control_api.py
 test/test_control_request.py
 test/test_error.py
 test/test_message.py
+test/test_message_x_agent_switch.py
+test/test_message_x_input.py
 test/test_messages_api.py
 test/test_response.py
 test/test_speech_api.py
