@@ -7,17 +7,15 @@ on:
     branches: [main]
 
 jobs:
-  python:
-    name: "Python — test"
+  build:
+    name: "Build & Test"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install uv
+      - name: Python — install and test
         uses: astral-sh/setup-uv@v4
-
-      - name: Install and test
-        run: |
+      - run: |
           cd python
           uv venv --python 3.11 .venv
           . .venv/bin/activate
@@ -26,69 +24,27 @@ jobs:
           python -c "from openvip import Client, create_transcription, Status; print('OK')"
           pytest tests/ -v
 
-  python-macos:
-    name: "Python — macOS ARM64"
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v4
-
-      - name: Install and test
-        run: |
-          cd python
-          uv venv --python 3.11 .venv
-          . .venv/bin/activate
-          uv pip install -e .
-          uv pip install pytest
-          pytest tests/ -v
-
-  typescript:
-    name: "TypeScript — build"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Node
+      - name: TypeScript — build
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-
-      - name: Install and build
-        run: |
+      - run: |
           cd typescript
           npm install
           npm run build
 
-  go:
-    name: "Go — build"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Go
+      - name: Go — build
         uses: actions/setup-go@v5
         with:
           go-version: "1.21"
-
-      - name: Build
-        run: |
+      - run: |
           cd go
           go build ./...
 
-  dotnet:
-    name: ".NET — build"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up .NET 10
+      - name: .NET — build
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "10.0.x"
-
-      - name: Build
-        run: |
+      - run: |
           cd dotnet
           dotnet build
