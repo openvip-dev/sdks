@@ -1,6 +1,6 @@
 # openvip.SpeechApi
 
-All URIs are relative to *http://localhost:8770/openvip*
+All URIs are relative to *http://localhost:8770*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -26,10 +26,10 @@ from openvip.models.response import Response
 from openvip.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost:8770/openvip
+# Defining the host is optional and defaults to http://localhost:8770
 # See configuration.py for a list of all supported configuration parameters.
 configuration = openvip.Configuration(
-    host = "http://localhost:8770/openvip"
+    host = "http://localhost:8770"
 )
 
 
@@ -92,10 +92,10 @@ from openvip.models.speech_response import SpeechResponse
 from openvip.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost:8770/openvip
+# Defining the host is optional and defaults to http://localhost:8770
 # See configuration.py for a list of all supported configuration parameters.
 configuration = openvip.Configuration(
-    host = "http://localhost:8770/openvip"
+    host = "http://localhost:8770"
 )
 
 
