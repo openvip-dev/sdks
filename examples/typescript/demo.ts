@@ -21,10 +21,12 @@ const client = new Client();
 })();
 
 // Listen for transcriptions and echo them back via TTS
-for await (const message of client.subscribe(name, { reconnect: true })) {
-  console.log(`[user ] ${message.text}`);
+(async () => {
+  for await (const message of client.subscribe(name, { reconnect: true })) {
+    console.log(`[user ] ${message.text}`);
 
-  if (message.text?.trim()) {
-    await client.speak(`You said: ${message.text}`, { language: "en" });
+    if (message.text?.trim()) {
+      await client.speak(`You said: ${message.text}`, { language: "en" });
+    }
   }
-}
+})();
