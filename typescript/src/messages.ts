@@ -43,6 +43,8 @@ export function createTranscription(
 
 /**
  * Create a SpeechRequest with auto-filled protocol fields.
+ *
+ * Automatically generates `id` (UUID) and `timestamp` (now, UTC).
  */
 export function createSpeechRequest(
   text: string,
@@ -51,6 +53,8 @@ export function createSpeechRequest(
   return {
     openvip: PROTOCOL_VERSION,
     type: SpeechRequestTypeEnum.Speech,
+    id: crypto.randomUUID(),
+    timestamp: new Date(),
     text,
     language,
   };

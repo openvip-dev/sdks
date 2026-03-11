@@ -349,6 +349,8 @@ public record TranscriptionDto(
 public record SpeechRequestDto(
     string Openvip,
     string Type,
+    Guid Id,
+    DateTime Timestamp,
     string Text,
     string? Language = null);
 

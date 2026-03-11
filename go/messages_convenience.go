@@ -26,9 +26,14 @@ func NewTranscriptionMessage(text string) *Transcription {
 }
 
 // NewSpeechRequestMessage creates a SpeechRequest with auto-filled protocol fields.
+// Generates a random UUID for id and uses current UTC time for timestamp.
 // Language is optional (pass nil to omit).
 func NewSpeechRequestMessage(text string, language *string) *SpeechRequest {
 	req := NewSpeechRequest(ProtocolVersion, "speech", text)
+	req.AdditionalProperties = map[string]interface{}{
+		"id":        generateUUID(),
+		"timestamp": time.Now().UTC().Format(time.RFC3339),
+	}
 	if language != nil {
 		req.SetLanguage(*language)
 	}

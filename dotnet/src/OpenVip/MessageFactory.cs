@@ -41,7 +41,7 @@ public static class MessageFactory
     }
 
     /// <summary>
-    /// Create a SpeechRequest with auto-filled protocol version.
+    /// Create a SpeechRequest with auto-filled id and timestamp.
     /// </summary>
     public static SpeechRequestDto CreateSpeechRequest(
         string text,
@@ -50,6 +50,8 @@ public static class MessageFactory
         return new SpeechRequestDto(
             Openvip: ProtocolVersion,
             Type: "speech",
+            Id: Guid.NewGuid(),
+            Timestamp: DateTime.UtcNow,
             Text: text,
             Language: language);
     }
