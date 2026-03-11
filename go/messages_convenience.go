@@ -38,6 +38,11 @@ func NewSpeechRequestMessage(text string, language *string) *SpeechRequest {
 	return req
 }
 
+// NewControlRequestMessage creates a ControlRequest with auto-filled protocol fields.
+func NewControlRequestMessage(command string) *ControlRequest {
+	return NewControlRequest(ProtocolVersion, generateUUID(), command)
+}
+
 // generateUUID generates a random UUID v4 string without external dependencies.
 func generateUUID() string {
 	var uuid [16]byte

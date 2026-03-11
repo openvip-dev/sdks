@@ -123,31 +123,31 @@ func (c *Client) GetStatus(ctx context.Context) (*Status, error) {
 }
 
 // Control sends a control command to the engine.
-func (c *Client) Control(ctx context.Context, command string) (*Ack, error) {
-	body := map[string]interface{}{"command": command}
-	var resp Ack
-	err := c.post(ctx, "/control", body, &resp)
+func (c *Client) Control(ctx context.Context, command string) (*Response, error) {
+	req := NewControlRequestMessage(command)
+	var resp Response
+	err := c.post(ctx, "/control", req, &resp)
 	return &resp, err
 }
 
 // StartListening starts speech-to-text.
-func (c *Client) StartListening(ctx context.Context) (*Ack, error) {
+func (c *Client) StartListening(ctx context.Context) (*Response, error) {
 	return c.Control(ctx, "stt.start")
 }
 
 // StopListening stops speech-to-text.
-func (c *Client) StopListening(ctx context.Context) (*Ack, error) {
+func (c *Client) StopListening(ctx context.Context) (*Response, error) {
 	return c.Control(ctx, "stt.stop")
 }
 
 // Shutdown requests engine shutdown.
-func (c *Client) Shutdown(ctx context.Context) (*Ack, error) {
+func (c *Client) Shutdown(ctx context.Context) (*Response, error) {
 	return c.Control(ctx, "engine.shutdown")
 }
 
 // SendMessage sends a transcription message to a connected agent.
-func (c *Client) SendMessage(ctx context.Context, agentID string, msg Transcription) (*Ack, error) {
-	var resp Ack
+func (c *Client) SendMessage(ctx context.Context, agentID string, msg Transcription) (*Response, error) {
+	var resp Response
 	err := c.post(ctx, fmt.Sprintf("/agents/%s/messages", agentID), msg, &resp)
 	return &resp, err
 }
