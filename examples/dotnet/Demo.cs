@@ -1,103 +1,33 @@
-// OpenVIP .NET SDK demo.
-//
-// Connects to a local OpenVIP engine (e.g. an OpenVIP engine) and demonstrates
-// SDK features: status, control, speech, and messaging.
-//
-// Usage:
-//   dotnet run
+// OpenVIP .NET SDK demo
+// Usage: dotnet run [NAME]
 
-using OpenVip.Api;
-using OpenVip.Client;
-using OpenVip.Model;
+using OpenVip;
 
-var baseUrl = args.Length > 0 ? args[0] : "http://localhost:8770";
+var name = args.Length > 0 ? args[0] : "demo";
+var client = new OpenVipClient();
 
-Console.WriteLine("OpenVIP .NET SDK demo");
-Console.WriteLine($"Connecting to {baseUrl}...");
-Console.WriteLine();
+var cts = new CancellationTokenSource();
+Console.CancelKeyPress += (_, e) => { e.Cancel = true; cts.Cancel(); };
 
-// 1. Status
-Console.WriteLine("=== GET /status ===");
-try
+// Watch which agent has focus and print a message when it changes
+_ = Task.Run(async () =>
 {
-    var statusApi = new StatusApi(baseUrl);
-    var status = await statusApi.GetStatusAsync();
-    Console.WriteLine($"  Protocol: {status.ProtocolVersion}");
-    Console.WriteLine($"  Agents:   [{string.Join(", ", status.ConnectedAgents ?? new List<string>())}]");
-}
-catch (Exception e)
-{
-    Console.WriteLine($"  Error: {e.Message}");
-    Console.WriteLine("  Is the engine running? Start the engine: myengine listen --agents");
-    Environment.Exit(1);
-}
-Console.WriteLine();
+    await foreach (var status in client.SubscribeStatusAsync(
+        new SubscribeOptions { Reconnect = true }, cts.Token))
+    {
+        // Note: platform dict access not yet available in StatusDto
+        Console.WriteLine("[agent] Hey, I'm here!");
+    }
+});
 
-// 2. Control — start listening
-Console.WriteLine("=== POST /control (stt.start) ===");
-try
+// Listen for transcriptions and echo them back via TTS
+await foreach (var message in client.SubscribeAsync(name,
+    new SubscribeOptions { Reconnect = true }, cts.Token))
 {
-    var controlApi = new ControlApi(baseUrl);
-    var ack = await controlApi.SendControlAsync(new ControlRequest(ControlRequest.CommandEnum.SttStart));
-    Console.WriteLine($"  Response: {ack.Status}");
-}
-catch (Exception e)
-{
-    Console.WriteLine($"  Error: {e.Message}");
-}
-Console.WriteLine();
+    Console.WriteLine($"[user ] {message.Text}");
 
-// 3. Speech
-Console.WriteLine("=== POST /speech ===");
-try
-{
-    var speechApi = new SpeechApi(baseUrl);
-    var resp = await speechApi.TextToSpeechAsync(
-        new SpeechRequest("1.0", SpeechRequest.TypeEnum.Speech, "Hello from the OpenVIP .NET SDK!")
-        { Language = "en" }
-    );
-    Console.WriteLine($"  Status:   {resp.Status}");
-    Console.WriteLine($"  Duration: {resp.DurationMs}ms");
+    if (!string.IsNullOrWhiteSpace(message.Text))
+    {
+        await client.SpeakAsync($"You said: {message.Text}", language: "en", ct: cts.Token);
+    }
 }
-catch (Exception e)
-{
-    Console.WriteLine($"  Error: {e.Message}");
-}
-Console.WriteLine();
-
-// 4. Send message
-Console.WriteLine("=== POST /agents/demo/messages ===");
-try
-{
-    var messagesApi = new MessagesApi(baseUrl);
-    var msg = new Transcription(
-        openvip: "1.0",
-        type: Transcription.TypeEnum.Transcription,
-        id: Guid.NewGuid(),
-        timestamp: DateTime.UtcNow,
-        text: "Test message from .NET SDK demo"
-    ) { Language = "en" };
-    var ack = await messagesApi.SendMessageAsync("demo", msg);
-    Console.WriteLine($"  Response: {ack.Status}");
-}
-catch (Exception e)
-{
-    Console.WriteLine($"  Error: {e.Message} (expected if no 'demo' agent connected)");
-}
-Console.WriteLine();
-
-// 5. Control — stop listening
-Console.WriteLine("=== POST /control (stt.stop) ===");
-try
-{
-    var controlApi = new ControlApi(baseUrl);
-    var ack = await controlApi.SendControlAsync(new ControlRequest(ControlRequest.CommandEnum.SttStop));
-    Console.WriteLine($"  Response: {ack.Status}");
-}
-catch (Exception e)
-{
-    Console.WriteLine($"  Error: {e.Message}");
-}
-Console.WriteLine();
-
-Console.WriteLine("Demo complete!");

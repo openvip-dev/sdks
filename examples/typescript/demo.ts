@@ -1,108 +1,30 @@
-/**
- * OpenVIP TypeScript SDK demo.
- *
- * Connects to a local OpenVIP engine (e.g. an OpenVIP engine) and demonstrates
- * SDK features: status, control, speech, and messaging.
- *
- * Usage:
- *   cd ../../typescript && npm install && cd ../examples/typescript
- *   npx ts-node demo.ts
- */
+// OpenVIP TypeScript SDK demo
+// Usage: npx tsx demo.ts [NAME]
 
-import {
-  Configuration,
-  ControlApi,
-  MessagesApi,
-  SpeechApi,
-  StatusApi,
-} from "../../typescript/src";
+import { Client } from "../../typescript/src";
 
-const BASE_URL = process.argv[2] || "http://localhost:8770";
+const name = process.argv[2] || "demo";
+const client = new Client();
 
-async function main() {
-  const config = new Configuration({ basePath: BASE_URL });
+// Watch which agent has focus and print a message when it changes
+(async () => {
+  let wasFocused: boolean | null = null;
+  for await (const status of client.subscribeStatus({ reconnect: true })) {
+    const platform = (status as any).platform || {};
+    const isFocused = platform.output?.current_agent === name;
 
-  const statusApi = new StatusApi(config);
-  const controlApi = new ControlApi(config);
-  const speechApi = new SpeechApi(config);
-  const messagesApi = new MessagesApi(config);
-
-  console.log("OpenVIP TypeScript SDK demo");
-  console.log(`Connecting to ${BASE_URL}...`);
-  console.log();
-
-  // 1. Status
-  console.log("=== GET /status ===");
-  try {
-    const status = await statusApi.getStatus();
-    console.log(`  Protocol: ${status.protocolVersion}`);
-    console.log(`  Agents:   ${JSON.stringify(status.connectedAgents)}`);
-  } catch (e: any) {
-    console.log(`  Error: ${e.message}`);
-    console.log(
-      "  Is the engine running? Start the engine: myengine listen --agents"
-    );
-    process.exit(1);
+    if (isFocused !== wasFocused) {
+      wasFocused = isFocused;
+      console.log(isFocused ? "[agent] Hey, I'm here!" : "[agent] Ok, I'll wait here.");
+    }
   }
-  console.log();
+})();
 
-  // 2. Control — start listening
-  console.log("=== POST /control (stt.start) ===");
-  try {
-    const ack = await controlApi.sendControl({ command: "stt.start" });
-    console.log(`  Response: ${ack.status}`);
-  } catch (e: any) {
-    console.log(`  Error: ${e.message}`);
+// Listen for transcriptions and echo them back via TTS
+for await (const message of client.subscribe(name, { reconnect: true })) {
+  console.log(`[user ] ${message.text}`);
+
+  if (message.text?.trim()) {
+    await client.speak(`You said: ${message.text}`, { language: "en" });
   }
-  console.log();
-
-  // 3. Speech — text-to-speech
-  console.log("=== POST /speech ===");
-  try {
-    const resp = await speechApi.textToSpeech({
-      openvip: "1.0",
-      type: "speech",
-      text: "Hello from the OpenVIP TypeScript SDK!",
-      language: "en",
-    });
-    console.log(`  Status:   ${resp.status}`);
-    console.log(`  Duration: ${resp.durationMs}ms`);
-  } catch (e: any) {
-    console.log(`  Error: ${e.message}`);
-  }
-  console.log();
-
-  // 4. Send message
-  console.log("=== POST /agents/demo/messages ===");
-  try {
-    const ack = await messagesApi.sendMessage({
-      agentId: "demo",
-      transcription: {
-        openvip: "1.0",
-        type: "transcription",
-        id: crypto.randomUUID(),
-        timestamp: new Date(),
-        text: "Test message from TypeScript SDK demo",
-        language: "en",
-      },
-    });
-    console.log(`  Response: ${ack.status}`);
-  } catch (e: any) {
-    console.log(`  Error: ${e.message} (expected if no 'demo' agent connected)`);
-  }
-  console.log();
-
-  // 5. Control — stop listening
-  console.log("=== POST /control (stt.stop) ===");
-  try {
-    const ack = await controlApi.sendControl({ command: "stt.stop" });
-    console.log(`  Response: ${ack.status}`);
-  } catch (e: any) {
-    console.log(`  Error: ${e.message}`);
-  }
-  console.log();
-
-  console.log("Demo complete!");
 }
-
-main().catch(console.error);

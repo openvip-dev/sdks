@@ -1,102 +1,63 @@
-// OpenVIP Go SDK demo.
-//
-// Connects to a local OpenVIP engine (e.g. an OpenVIP engine) and demonstrates
-// SDK features: status, control, speech, and messaging.
-//
-// Usage:
-//
-//	go run main.go [http://localhost:8770]
+// OpenVIP Go SDK demo
+// Usage: go run main.go [NAME]
+
 package main
 
 import (
 	"context"
 	"fmt"
 	"os"
-	"time"
+	"os/signal"
 
-	"github.com/google/uuid"
-	openapi "github.com/openvip/go"
+	openvip "github.com/openvip-dev/sdks"
 )
 
 func main() {
-	baseURL := "http://localhost:8770"
+	name := "demo"
 	if len(os.Args) > 1 {
-		baseURL = os.Args[1]
+		name = os.Args[1]
 	}
 
-	config := openapi.NewConfiguration()
-	config.Servers = openapi.ServerConfigurations{
-		{URL: baseURL},
-	}
-	client := openapi.NewAPIClient(config)
-	ctx := context.Background()
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer cancel()
 
-	fmt.Println("OpenVIP Go SDK demo")
-	fmt.Printf("Connecting to %s...\n\n", baseURL)
+	client := openvip.NewClient("http://localhost:8770/openvip", nil)
 
-	// 1. Status
-	fmt.Println("=== GET /status ===")
-	status, _, err := client.StatusAPI.GetStatus(ctx).Execute()
-	if err != nil {
-		fmt.Printf("  Error: %v\n", err)
-		fmt.Println("  Is the engine running? Start the engine: myengine listen --agents")
-		os.Exit(1)
-	}
-	fmt.Printf("  Protocol: %s\n", *status.ProtocolVersion)
-	fmt.Printf("  Agents:   %v\n", status.ConnectedAgents)
-	fmt.Println()
+	// Watch which agent has focus and print a message when it changes
+	go func() {
+		statusCh, _ := client.SubscribeStatus(ctx, &openvip.SubscribeOptions{Reconnect: true})
+		wasFocused := false
+		first := true
 
-	// 2. Control — start listening
-	fmt.Println("=== POST /control (stt.start) ===")
-	controlReq := *openapi.NewControlRequest("stt.start")
-	ack, _, err := client.ControlAPI.SendControl(ctx).ControlRequest(controlReq).Execute()
-	if err != nil {
-		fmt.Printf("  Error: %v\n", err)
-	} else {
-		fmt.Printf("  Response: %s\n", ack.Status)
-	}
-	fmt.Println()
+		for status := range statusCh {
+			currentAgent := ""
+			if output, ok := status.Platform["output"].(map[string]interface{}); ok {
+				if agent, ok := output["current_agent"].(string); ok {
+					currentAgent = agent
+				}
+			}
 
-	// 3. Speech
-	fmt.Println("=== POST /speech ===")
-	speechReq := *openapi.NewSpeechRequest("1.0", "speech", "Hello from the OpenVIP Go SDK!")
-	lang := "en"
-	speechReq.Language = &lang
-	speechResp, _, err := client.SpeechAPI.TextToSpeech(ctx).SpeechRequest(speechReq).Execute()
-	if err != nil {
-		fmt.Printf("  Error: %v\n", err)
-	} else {
-		fmt.Printf("  Status:   %s\n", speechResp.Status)
-		if speechResp.DurationMs != nil {
-			fmt.Printf("  Duration: %dms\n", *speechResp.DurationMs)
+			isFocused := currentAgent == name
+			if isFocused != wasFocused || first {
+				first = false
+				wasFocused = isFocused
+				if isFocused {
+					fmt.Println("[agent] Hey, I'm here!")
+				} else {
+					fmt.Println("[agent] Ok, I'll wait here.")
+				}
+			}
+		}
+	}()
+
+	// Listen for transcriptions and echo them back via TTS
+	messageCh, _ := client.Subscribe(ctx, name, &openvip.SubscribeOptions{Reconnect: true})
+
+	for message := range messageCh {
+		fmt.Printf("[user ] %s\n", message.Text)
+
+		if message.Text != "" {
+			client.Speak(ctx, fmt.Sprintf("You said: %s", message.Text), &openvip.SpeakOptions{Language: "en"})
 		}
 	}
-	fmt.Println()
-
-	// 4. Send message
-	fmt.Println("=== POST /agents/demo/messages ===")
-	now := time.Now()
-	msgID := uuid.New().String()
-	msg := *openapi.NewTranscription("1.0", "transcription", msgID, now, "Test message from Go SDK demo")
-	msg.Language = &lang
-	ack2, _, err := client.MessagesAPI.SendMessage(ctx, "demo").Transcription(msg).Execute()
-	if err != nil {
-		fmt.Printf("  Error: %v (expected if no 'demo' agent connected)\n", err)
-	} else {
-		fmt.Printf("  Response: %s\n", ack2.Status)
-	}
-	fmt.Println()
-
-	// 5. Control — stop listening
-	fmt.Println("=== POST /control (stt.stop) ===")
-	controlReq2 := *openapi.NewControlRequest("stt.stop")
-	ack3, _, err := client.ControlAPI.SendControl(ctx).ControlRequest(controlReq2).Execute()
-	if err != nil {
-		fmt.Printf("  Error: %v\n", err)
-	} else {
-		fmt.Printf("  Response: %s\n", ack3.Status)
-	}
-	fmt.Println()
-
-	fmt.Println("Demo complete!")
 }
