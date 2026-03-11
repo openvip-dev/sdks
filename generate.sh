@@ -47,15 +47,26 @@ if ! command -v docker &> /dev/null; then
 fi
 
 # Prepare spec path for Docker
+LOCAL_FALLBACK="$SCRIPT_DIR/openapi.yaml"
+TEMP_SPEC=""
+
 if [[ "$SPEC" == http* ]]; then
-    # Download spec to temp file
+    # Try downloading from remote; fall back to local copy
     TEMP_SPEC="$SCRIPT_DIR/.openapi-spec.yaml"
-    echo "Downloading spec..."
-    curl -sL "$SPEC" -o "$TEMP_SPEC"
-    DOCKER_SPEC="/local/.openapi-spec.yaml"
+    echo "Downloading spec from $SPEC ..."
+    if curl -sfL "$SPEC" -o "$TEMP_SPEC" 2>/dev/null; then
+        echo "  → using remote spec"
+        DOCKER_SPEC="/local/.openapi-spec.yaml"
+    elif [[ -f "$LOCAL_FALLBACK" ]]; then
+        echo "  → remote unavailable, using local copy: openapi.yaml"
+        TEMP_SPEC=""
+        DOCKER_SPEC="/local/openapi.yaml"
+    else
+        echo "Error: cannot download spec and no local openapi.yaml found."
+        exit 1
+    fi
 else
     # Local file - use absolute path
-    TEMP_SPEC=""
     if [[ "$SPEC" == /* ]]; then
         DOCKER_SPEC="/local/$(basename "$SPEC")"
         cp "$SPEC" "$SCRIPT_DIR/$(basename "$SPEC")"
