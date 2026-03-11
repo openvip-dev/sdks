@@ -2,7 +2,7 @@
 /* eslint-disable */
 /**
  * OpenVIP API
- * Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d \'{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}\'  # Text-to-speech curl -X POST http://localhost:8770/speech \\   -H \"Content-Type: application/json\" \\   -d \'{\"openvip\": \"1.0\", \"type\": \"speech\", \"text\": \"hello world\", \"language\": \"en\"}\' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
+ * Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Base Path  The OpenVIP protocol defines **relative paths** only. The base path is **implementation-defined** — implementations choose where to mount these endpoints. The recommended base path is `/openvip/`.  Implementations SHOULD serve this OpenAPI spec at `{base_path}/openapi.json` for discovery (e.g. `GET /openvip/openapi.json`).  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/openvip/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/openvip/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d \'{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}\'  # Text-to-speech curl -X POST http://localhost:8770/openvip/speech \\   -H \"Content-Type: application/json\" \\   -d \'{\"openvip\": \"1.0\", \"type\": \"speech\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:05Z\", \"text\": \"hello world\", \"language\": \"en\"}\' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -15,14 +15,14 @@
 
 import * as runtime from '../runtime';
 import type {
-  Ack,
   ControlRequest,
+  Response,
 } from '../models/index';
 import {
-    AckFromJSON,
-    AckToJSON,
     ControlRequestFromJSON,
     ControlRequestToJSON,
+    ResponseFromJSON,
+    ResponseToJSON,
 } from '../models/index';
 
 export interface SendControlRequest {
@@ -67,18 +67,18 @@ export class ControlApi extends runtime.BaseAPI {
      * Send a control command to the engine.  Available commands: - `stt.start` — Start speech-to-text - `stt.stop` — Stop speech-to-text - `engine.shutdown` — Graceful shutdown 
      * Send control command
      */
-    async sendControlRaw(requestParameters: SendControlRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Ack>> {
+    async sendControlRaw(requestParameters: SendControlRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Response>> {
         const requestOptions = await this.sendControlRequestOpts(requestParameters);
         const response = await this.request(requestOptions, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => AckFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => ResponseFromJSON(jsonValue));
     }
 
     /**
      * Send a control command to the engine.  Available commands: - `stt.start` — Start speech-to-text - `stt.stop` — Stop speech-to-text - `engine.shutdown` — Graceful shutdown 
      * Send control command
      */
-    async sendControl(requestParameters: SendControlRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Ack> {
+    async sendControl(requestParameters: SendControlRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Response> {
         const response = await this.sendControlRaw(requestParameters, initOverrides);
         return await response.value();
     }

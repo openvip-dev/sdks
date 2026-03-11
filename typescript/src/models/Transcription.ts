@@ -2,7 +2,7 @@
 /* eslint-disable */
 /**
  * OpenVIP API
- * Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d \'{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}\'  # Text-to-speech curl -X POST http://localhost:8770/speech \\   -H \"Content-Type: application/json\" \\   -d \'{\"openvip\": \"1.0\", \"type\": \"speech\", \"text\": \"hello world\", \"language\": \"en\"}\' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
+ * Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Base Path  The OpenVIP protocol defines **relative paths** only. The base path is **implementation-defined** — implementations choose where to mount these endpoints. The recommended base path is `/openvip/`.  Implementations SHOULD serve this OpenAPI spec at `{base_path}/openapi.json` for discovery (e.g. `GET /openvip/openapi.json`).  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/openvip/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/openvip/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d \'{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}\'  # Text-to-speech curl -X POST http://localhost:8770/openvip/speech \\   -H \"Content-Type: application/json\" \\   -d \'{\"openvip\": \"1.0\", \"type\": \"speech\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:05Z\", \"text\": \"hello world\", \"language\": \"en\"}\' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -13,21 +13,35 @@
  */
 
 import { mapValues } from '../runtime';
+import type { MessageXInput } from './MessageXInput';
+import {
+    MessageXInputFromJSON,
+    MessageXInputFromJSONTyped,
+    MessageXInputToJSON,
+    MessageXInputToJSONTyped,
+} from './MessageXInput';
+import type { MessageXAgentSwitch } from './MessageXAgentSwitch';
+import {
+    MessageXAgentSwitchFromJSON,
+    MessageXAgentSwitchFromJSONTyped,
+    MessageXAgentSwitchToJSON,
+    MessageXAgentSwitchToJSONTyped,
+} from './MessageXAgentSwitch';
+
 /**
  * Voice transcription message
  * @export
  * @interface Transcription
  */
 export interface Transcription {
-    [key: string]: any | any;
     /**
      * Protocol version
-     * @type {string}
+     * @type {TranscriptionOpenvipEnum}
      * @memberof Transcription
      */
-    openvip: string;
+    openvip: TranscriptionOpenvipEnum;
     /**
-     * Message type
+     * 
      * @type {TranscriptionTypeEnum}
      * @memberof Transcription
      */
@@ -45,7 +59,7 @@ export interface Transcription {
      */
     timestamp: Date;
     /**
-     * Transcribed text
+     * Message text content
      * @type {string}
      * @memberof Transcription
      */
@@ -63,18 +77,6 @@ export interface Transcription {
      */
     language?: string;
     /**
-     * Transcription confidence score
-     * @type {number}
-     * @memberof Transcription
-     */
-    confidence?: number;
-    /**
-     * If true, this is an incomplete transcription in progress
-     * @type {boolean}
-     * @memberof Transcription
-     */
-    partial?: boolean;
-    /**
      * ID of the original message (OpenTelemetry-style)
      * @type {string}
      * @memberof Transcription
@@ -86,8 +88,40 @@ export interface Transcription {
      * @memberof Transcription
      */
     parentId?: string;
+    /**
+     * 
+     * @type {MessageXInput}
+     * @memberof Transcription
+     */
+    xInput?: MessageXInput;
+    /**
+     * 
+     * @type {MessageXAgentSwitch}
+     * @memberof Transcription
+     */
+    xAgentSwitch?: MessageXAgentSwitch;
+    /**
+     * Transcription confidence score
+     * @type {number}
+     * @memberof Transcription
+     */
+    confidence?: number;
+    /**
+     * If true, this is an incomplete transcription in progress
+     * @type {boolean}
+     * @memberof Transcription
+     */
+    partial?: boolean;
 }
 
+
+/**
+ * @export
+ */
+export const TranscriptionOpenvipEnum = {
+    _10: '1.0'
+} as const;
+export type TranscriptionOpenvipEnum = typeof TranscriptionOpenvipEnum[keyof typeof TranscriptionOpenvipEnum];
 
 /**
  * @export
@@ -120,7 +154,6 @@ export function TranscriptionFromJSONTyped(json: any, ignoreDiscriminator: boole
     }
     return {
         
-            ...json,
         'openvip': json['openvip'],
         'type': json['type'],
         'id': json['id'],
@@ -128,10 +161,12 @@ export function TranscriptionFromJSONTyped(json: any, ignoreDiscriminator: boole
         'text': json['text'],
         'origin': json['origin'] == null ? undefined : json['origin'],
         'language': json['language'] == null ? undefined : json['language'],
-        'confidence': json['confidence'] == null ? undefined : json['confidence'],
-        'partial': json['partial'] == null ? undefined : json['partial'],
         'traceId': json['trace_id'] == null ? undefined : json['trace_id'],
         'parentId': json['parent_id'] == null ? undefined : json['parent_id'],
+        'xInput': json['x_input'] == null ? undefined : MessageXInputFromJSON(json['x_input']),
+        'xAgentSwitch': json['x_agent_switch'] == null ? undefined : MessageXAgentSwitchFromJSON(json['x_agent_switch']),
+        'confidence': json['confidence'] == null ? undefined : json['confidence'],
+        'partial': json['partial'] == null ? undefined : json['partial'],
     };
 }
 
@@ -146,7 +181,6 @@ export function TranscriptionToJSONTyped(value?: Transcription | null, ignoreDis
 
     return {
         
-            ...value,
         'openvip': value['openvip'],
         'type': value['type'],
         'id': value['id'],
@@ -154,10 +188,12 @@ export function TranscriptionToJSONTyped(value?: Transcription | null, ignoreDis
         'text': value['text'],
         'origin': value['origin'],
         'language': value['language'],
-        'confidence': value['confidence'],
-        'partial': value['partial'],
         'trace_id': value['traceId'],
         'parent_id': value['parentId'],
+        'x_input': MessageXInputToJSON(value['xInput']),
+        'x_agent_switch': MessageXAgentSwitchToJSON(value['xAgentSwitch']),
+        'confidence': value['confidence'],
+        'partial': value['partial'],
     };
 }
 

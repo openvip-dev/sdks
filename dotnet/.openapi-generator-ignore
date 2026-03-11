@@ -27,3 +27,4 @@ src/OpenVip/OpenVipClient.cs
 src/OpenVip/MessageFactory.cs
 src/OpenVip/OpenVip.csproj
 src/OpenVip.Test/OpenVip.Test.csproj
+src/OpenVip.Test/OpenVipClientTests.cs

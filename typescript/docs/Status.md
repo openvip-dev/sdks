@@ -7,8 +7,9 @@ Engine status
 
 Name | Type
 ------------ | -------------
-`protocolVersion` | string
-`state` | string
+`openvip` | string
+`stt` | [StatusStt](StatusStt.md)
+`tts` | [StatusTts](StatusTts.md)
 `connectedAgents` | Array&lt;string&gt;
 `platform` | { [key: string]: any; }
 
@@ -19,8 +20,9 @@ import type { Status } from 'openvip'
 
 // TODO: Update the object below with actual values
 const example = {
-  "protocolVersion": 1.0,
-  "state": listening,
+  "openvip": null,
+  "stt": null,
+  "tts": null,
   "connectedAgents": null,
   "platform": null,
 } satisfies Status

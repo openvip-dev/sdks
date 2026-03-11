@@ -1,7 +1,7 @@
 /*
 OpenVIP API
 
-Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}'  # Text-to-speech curl -X POST http://localhost:8770/speech \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"speech\", \"text\": \"hello world\", \"language\": \"en\"}' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
+Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Base Path  The OpenVIP protocol defines **relative paths** only. The base path is **implementation-defined** — implementations choose where to mount these endpoints. The recommended base path is `/openvip/`.  Implementations SHOULD serve this OpenAPI spec at `{base_path}/openapi.json` for discovery (e.g. `GET /openvip/openapi.json`).  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/openvip/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/openvip/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}'  # Text-to-speech curl -X POST http://localhost:8770/openvip/speech \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"speech\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:05Z\", \"text\": \"hello world\", \"language\": \"en\"}' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
 
 API version: 1.0
 */
@@ -33,7 +33,7 @@ func (r ApiSendControlRequest) ControlRequest(controlRequest ControlRequest) Api
 	return r
 }
 
-func (r ApiSendControlRequest) Execute() (*Ack, *http.Response, error) {
+func (r ApiSendControlRequest) Execute() (*Response, *http.Response, error) {
 	return r.ApiService.SendControlExecute(r)
 }
 
@@ -59,13 +59,13 @@ func (a *ControlAPIService) SendControl(ctx context.Context) ApiSendControlReque
 }
 
 // Execute executes the request
-//  @return Ack
-func (a *ControlAPIService) SendControlExecute(r ApiSendControlRequest) (*Ack, *http.Response, error) {
+//  @return Response
+func (a *ControlAPIService) SendControlExecute(r ApiSendControlRequest) (*Response, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  *Ack
+		localVarReturnValue  *Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ControlAPIService.SendControl")

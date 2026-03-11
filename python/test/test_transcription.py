@@ -45,8 +45,9 @@ class TestTranscription(unittest.TestCase):
                 trace_id = '',
                 parent_id = '',
                 x_input = openvip.models.message_x_input.Message_x_input(
-                    submit = True, 
-                    newline = True, 
+                    ops = [
+                        'submit'
+                        ], 
                     trigger = '', 
                     confidence = 0, 
                     source = '', ),

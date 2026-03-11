@@ -2,7 +2,7 @@
 /* eslint-disable */
 /**
  * OpenVIP API
- * Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d \'{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}\'  # Text-to-speech curl -X POST http://localhost:8770/speech \\   -H \"Content-Type: application/json\" \\   -d \'{\"openvip\": \"1.0\", \"type\": \"speech\", \"text\": \"hello world\", \"language\": \"en\"}\' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
+ * Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Base Path  The OpenVIP protocol defines **relative paths** only. The base path is **implementation-defined** — implementations choose where to mount these endpoints. The recommended base path is `/openvip/`.  Implementations SHOULD serve this OpenAPI spec at `{base_path}/openapi.json` for discovery (e.g. `GET /openvip/openapi.json`).  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/openvip/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/openvip/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d \'{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}\'  # Text-to-speech curl -X POST http://localhost:8770/openvip/speech \\   -H \"Content-Type: application/json\" \\   -d \'{\"openvip\": \"1.0\", \"type\": \"speech\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:05Z\", \"text\": \"hello world\", \"language\": \"en\"}\' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -13,39 +13,109 @@
  */
 
 import { mapValues } from '../runtime';
+import type { MessageXInput } from './MessageXInput';
+import {
+    MessageXInputFromJSON,
+    MessageXInputFromJSONTyped,
+    MessageXInputToJSON,
+    MessageXInputToJSONTyped,
+} from './MessageXInput';
+import type { MessageXAgentSwitch } from './MessageXAgentSwitch';
+import {
+    MessageXAgentSwitchFromJSON,
+    MessageXAgentSwitchFromJSONTyped,
+    MessageXAgentSwitchToJSON,
+    MessageXAgentSwitchToJSONTyped,
+} from './MessageXAgentSwitch';
+
 /**
  * Text-to-speech request
  * @export
  * @interface SpeechRequest
  */
 export interface SpeechRequest {
-    [key: string]: any | any;
     /**
      * Protocol version
-     * @type {string}
+     * @type {SpeechRequestOpenvipEnum}
      * @memberof SpeechRequest
      */
-    openvip: string;
+    openvip: SpeechRequestOpenvipEnum;
     /**
-     * Message type
+     * 
      * @type {SpeechRequestTypeEnum}
      * @memberof SpeechRequest
      */
     type: SpeechRequestTypeEnum;
     /**
-     * Text to synthesize
+     * Unique message identifier
+     * @type {string}
+     * @memberof SpeechRequest
+     */
+    id: string;
+    /**
+     * ISO 8601 timestamp
+     * @type {Date}
+     * @memberof SpeechRequest
+     */
+    timestamp: Date;
+    /**
+     * Message text content
      * @type {string}
      * @memberof SpeechRequest
      */
     text: string;
+    /**
+     * Producer identifier
+     * @type {string}
+     * @memberof SpeechRequest
+     */
+    origin?: string;
     /**
      * BCP 47 language tag
      * @type {string}
      * @memberof SpeechRequest
      */
     language?: string;
+    /**
+     * ID of the original message (OpenTelemetry-style)
+     * @type {string}
+     * @memberof SpeechRequest
+     */
+    traceId?: string;
+    /**
+     * ID of the parent message (OpenTelemetry-style)
+     * @type {string}
+     * @memberof SpeechRequest
+     */
+    parentId?: string;
+    /**
+     * 
+     * @type {MessageXInput}
+     * @memberof SpeechRequest
+     */
+    xInput?: MessageXInput;
+    /**
+     * 
+     * @type {MessageXAgentSwitch}
+     * @memberof SpeechRequest
+     */
+    xAgentSwitch?: MessageXAgentSwitch;
+    /**
+     * Voice identifier (engine-specific, e.g. "af_sky" for Kokoro)
+     * @type {string}
+     * @memberof SpeechRequest
+     */
+    voice?: string;
 }
 
+
+/**
+ * @export
+ */
+export const SpeechRequestOpenvipEnum = {
+    _10: '1.0'
+} as const;
+export type SpeechRequestOpenvipEnum = typeof SpeechRequestOpenvipEnum[keyof typeof SpeechRequestOpenvipEnum];
 
 /**
  * @export
@@ -62,6 +132,8 @@ export type SpeechRequestTypeEnum = typeof SpeechRequestTypeEnum[keyof typeof Sp
 export function instanceOfSpeechRequest(value: object): value is SpeechRequest {
     if (!('openvip' in value) || value['openvip'] === undefined) return false;
     if (!('type' in value) || value['type'] === undefined) return false;
+    if (!('id' in value) || value['id'] === undefined) return false;
+    if (!('timestamp' in value) || value['timestamp'] === undefined) return false;
     if (!('text' in value) || value['text'] === undefined) return false;
     return true;
 }
@@ -76,11 +148,18 @@ export function SpeechRequestFromJSONTyped(json: any, ignoreDiscriminator: boole
     }
     return {
         
-            ...json,
         'openvip': json['openvip'],
         'type': json['type'],
+        'id': json['id'],
+        'timestamp': (new Date(json['timestamp'])),
         'text': json['text'],
+        'origin': json['origin'] == null ? undefined : json['origin'],
         'language': json['language'] == null ? undefined : json['language'],
+        'traceId': json['trace_id'] == null ? undefined : json['trace_id'],
+        'parentId': json['parent_id'] == null ? undefined : json['parent_id'],
+        'xInput': json['x_input'] == null ? undefined : MessageXInputFromJSON(json['x_input']),
+        'xAgentSwitch': json['x_agent_switch'] == null ? undefined : MessageXAgentSwitchFromJSON(json['x_agent_switch']),
+        'voice': json['voice'] == null ? undefined : json['voice'],
     };
 }
 
@@ -95,11 +174,18 @@ export function SpeechRequestToJSONTyped(value?: SpeechRequest | null, ignoreDis
 
     return {
         
-            ...value,
         'openvip': value['openvip'],
         'type': value['type'],
+        'id': value['id'],
+        'timestamp': value['timestamp'].toISOString(),
         'text': value['text'],
+        'origin': value['origin'],
         'language': value['language'],
+        'trace_id': value['traceId'],
+        'parent_id': value['parentId'],
+        'x_input': MessageXInputToJSON(value['xInput']),
+        'x_agent_switch': MessageXAgentSwitchToJSON(value['xAgentSwitch']),
+        'voice': value['voice'],
     };
 }
 

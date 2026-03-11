@@ -1,7 +1,7 @@
 /*
 OpenVIP API
 
-Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}'  # Text-to-speech curl -X POST http://localhost:8770/speech \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"speech\", \"text\": \"hello world\", \"language\": \"en\"}' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
+Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Base Path  The OpenVIP protocol defines **relative paths** only. The base path is **implementation-defined** — implementations choose where to mount these endpoints. The recommended base path is `/openvip/`.  Implementations SHOULD serve this OpenAPI spec at `{base_path}/openapi.json` for discovery (e.g. `GET /openvip/openapi.json`).  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/openvip/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/openvip/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}'  # Text-to-speech curl -X POST http://localhost:8770/openvip/speech \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"speech\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:05Z\", \"text\": \"hello world\", \"language\": \"en\"}' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
 
 API version: 1.0
 */
@@ -12,6 +12,8 @@ package openvip
 
 import (
 	"encoding/json"
+	"bytes"
+	"fmt"
 )
 
 // checks if the Status type satisfies the MappedNullable interface at compile time
@@ -19,22 +21,25 @@ var _ MappedNullable = &Status{}
 
 // Status Engine status
 type Status struct {
-	// Supported OpenVIP protocol version
-	ProtocolVersion *string `json:"protocol_version,omitempty"`
-	// Current engine state
-	State *string `json:"state,omitempty"`
+	// Protocol version
+	Openvip string `json:"openvip"`
+	Stt *StatusStt `json:"stt,omitempty"`
+	Tts *StatusTts `json:"tts,omitempty"`
 	// List of connected agent identifiers
 	ConnectedAgents []string `json:"connected_agents,omitempty"`
 	// Implementation-specific details (opaque to protocol)
 	Platform map[string]interface{} `json:"platform,omitempty"`
 }
 
+type _Status Status
+
 // NewStatus instantiates a new Status object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewStatus() *Status {
+func NewStatus(openvip string) *Status {
 	this := Status{}
+	this.Openvip = openvip
 	return &this
 }
 
@@ -46,68 +51,92 @@ func NewStatusWithDefaults() *Status {
 	return &this
 }
 
-// GetProtocolVersion returns the ProtocolVersion field value if set, zero value otherwise.
-func (o *Status) GetProtocolVersion() string {
-	if o == nil || IsNil(o.ProtocolVersion) {
+// GetOpenvip returns the Openvip field value
+func (o *Status) GetOpenvip() string {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.ProtocolVersion
+
+	return o.Openvip
 }
 
-// GetProtocolVersionOk returns a tuple with the ProtocolVersion field value if set, nil otherwise
+// GetOpenvipOk returns a tuple with the Openvip field value
 // and a boolean to check if the value has been set.
-func (o *Status) GetProtocolVersionOk() (*string, bool) {
-	if o == nil || IsNil(o.ProtocolVersion) {
+func (o *Status) GetOpenvipOk() (*string, bool) {
+	if o == nil {
 		return nil, false
 	}
-	return o.ProtocolVersion, true
+	return &o.Openvip, true
 }
 
-// HasProtocolVersion returns a boolean if a field has been set.
-func (o *Status) HasProtocolVersion() bool {
-	if o != nil && !IsNil(o.ProtocolVersion) {
+// SetOpenvip sets field value
+func (o *Status) SetOpenvip(v string) {
+	o.Openvip = v
+}
+
+// GetStt returns the Stt field value if set, zero value otherwise.
+func (o *Status) GetStt() StatusStt {
+	if o == nil || IsNil(o.Stt) {
+		var ret StatusStt
+		return ret
+	}
+	return *o.Stt
+}
+
+// GetSttOk returns a tuple with the Stt field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Status) GetSttOk() (*StatusStt, bool) {
+	if o == nil || IsNil(o.Stt) {
+		return nil, false
+	}
+	return o.Stt, true
+}
+
+// HasStt returns a boolean if a field has been set.
+func (o *Status) HasStt() bool {
+	if o != nil && !IsNil(o.Stt) {
 		return true
 	}
 
 	return false
 }
 
-// SetProtocolVersion gets a reference to the given string and assigns it to the ProtocolVersion field.
-func (o *Status) SetProtocolVersion(v string) {
-	o.ProtocolVersion = &v
+// SetStt gets a reference to the given StatusStt and assigns it to the Stt field.
+func (o *Status) SetStt(v StatusStt) {
+	o.Stt = &v
 }
 
-// GetState returns the State field value if set, zero value otherwise.
-func (o *Status) GetState() string {
-	if o == nil || IsNil(o.State) {
-		var ret string
+// GetTts returns the Tts field value if set, zero value otherwise.
+func (o *Status) GetTts() StatusTts {
+	if o == nil || IsNil(o.Tts) {
+		var ret StatusTts
 		return ret
 	}
-	return *o.State
+	return *o.Tts
 }
 
-// GetStateOk returns a tuple with the State field value if set, nil otherwise
+// GetTtsOk returns a tuple with the Tts field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Status) GetStateOk() (*string, bool) {
-	if o == nil || IsNil(o.State) {
+func (o *Status) GetTtsOk() (*StatusTts, bool) {
+	if o == nil || IsNil(o.Tts) {
 		return nil, false
 	}
-	return o.State, true
+	return o.Tts, true
 }
 
-// HasState returns a boolean if a field has been set.
-func (o *Status) HasState() bool {
-	if o != nil && !IsNil(o.State) {
+// HasTts returns a boolean if a field has been set.
+func (o *Status) HasTts() bool {
+	if o != nil && !IsNil(o.Tts) {
 		return true
 	}
 
 	return false
 }
 
-// SetState gets a reference to the given string and assigns it to the State field.
-func (o *Status) SetState(v string) {
-	o.State = &v
+// SetTts gets a reference to the given StatusTts and assigns it to the Tts field.
+func (o *Status) SetTts(v StatusTts) {
+	o.Tts = &v
 }
 
 // GetConnectedAgents returns the ConnectedAgents field value if set, zero value otherwise.
@@ -184,11 +213,12 @@ func (o Status) MarshalJSON() ([]byte, error) {
 
 func (o Status) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.ProtocolVersion) {
-		toSerialize["protocol_version"] = o.ProtocolVersion
+	toSerialize["openvip"] = o.Openvip
+	if !IsNil(o.Stt) {
+		toSerialize["stt"] = o.Stt
 	}
-	if !IsNil(o.State) {
-		toSerialize["state"] = o.State
+	if !IsNil(o.Tts) {
+		toSerialize["tts"] = o.Tts
 	}
 	if !IsNil(o.ConnectedAgents) {
 		toSerialize["connected_agents"] = o.ConnectedAgents
@@ -197,6 +227,43 @@ func (o Status) ToMap() (map[string]interface{}, error) {
 		toSerialize["platform"] = o.Platform
 	}
 	return toSerialize, nil
+}
+
+func (o *Status) UnmarshalJSON(data []byte) (err error) {
+	// This validates that all required properties are included in the JSON object
+	// by unmarshalling the object into a generic map with string keys and checking
+	// that every required field exists as a key in the generic map.
+	requiredProperties := []string{
+		"openvip",
+	}
+
+	allProperties := make(map[string]interface{})
+
+	err = json.Unmarshal(data, &allProperties)
+
+	if err != nil {
+		return err;
+	}
+
+	for _, requiredProperty := range(requiredProperties) {
+		if _, exists := allProperties[requiredProperty]; !exists {
+			return fmt.Errorf("no value given for required property %v", requiredProperty)
+		}
+	}
+
+	varStatus := _Status{}
+
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&varStatus)
+
+	if err != nil {
+		return err
+	}
+
+	*o = Status(varStatus)
+
+	return err
 }
 
 type NullableStatus struct {

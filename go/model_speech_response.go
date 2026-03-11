@@ -1,7 +1,7 @@
 /*
 OpenVIP API
 
-Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}'  # Text-to-speech curl -X POST http://localhost:8770/speech \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"speech\", \"text\": \"hello world\", \"language\": \"en\"}' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
+Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Base Path  The OpenVIP protocol defines **relative paths** only. The base path is **implementation-defined** — implementations choose where to mount these endpoints. The recommended base path is `/openvip/`.  Implementations SHOULD serve this OpenAPI spec at `{base_path}/openapi.json` for discovery (e.g. `GET /openvip/openapi.json`).  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/openvip/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/openvip/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}'  # Text-to-speech curl -X POST http://localhost:8770/openvip/speech \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"speech\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:05Z\", \"text\": \"hello world\", \"language\": \"en\"}' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
 
 API version: 1.0
 */
@@ -21,9 +21,15 @@ var _ MappedNullable = &SpeechResponse{}
 
 // SpeechResponse Speech synthesis response
 type SpeechResponse struct {
+	// Protocol version
+	Openvip string `json:"openvip"`
 	Status string `json:"status"`
 	// Duration of the synthesized audio in milliseconds
 	DurationMs *int32 `json:"duration_ms,omitempty"`
+	// Unique identifier for this response (assigned by the engine)
+	Id *string `json:"id,omitempty"`
+	// ID of the speech request that triggered this response
+	Ref *string `json:"ref,omitempty"`
 }
 
 type _SpeechResponse SpeechResponse
@@ -32,8 +38,9 @@ type _SpeechResponse SpeechResponse
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSpeechResponse(status string) *SpeechResponse {
+func NewSpeechResponse(openvip string, status string) *SpeechResponse {
 	this := SpeechResponse{}
+	this.Openvip = openvip
 	this.Status = status
 	return &this
 }
@@ -44,6 +51,30 @@ func NewSpeechResponse(status string) *SpeechResponse {
 func NewSpeechResponseWithDefaults() *SpeechResponse {
 	this := SpeechResponse{}
 	return &this
+}
+
+// GetOpenvip returns the Openvip field value
+func (o *SpeechResponse) GetOpenvip() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Openvip
+}
+
+// GetOpenvipOk returns a tuple with the Openvip field value
+// and a boolean to check if the value has been set.
+func (o *SpeechResponse) GetOpenvipOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Openvip, true
+}
+
+// SetOpenvip sets field value
+func (o *SpeechResponse) SetOpenvip(v string) {
+	o.Openvip = v
 }
 
 // GetStatus returns the Status field value
@@ -102,6 +133,70 @@ func (o *SpeechResponse) SetDurationMs(v int32) {
 	o.DurationMs = &v
 }
 
+// GetId returns the Id field value if set, zero value otherwise.
+func (o *SpeechResponse) GetId() string {
+	if o == nil || IsNil(o.Id) {
+		var ret string
+		return ret
+	}
+	return *o.Id
+}
+
+// GetIdOk returns a tuple with the Id field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SpeechResponse) GetIdOk() (*string, bool) {
+	if o == nil || IsNil(o.Id) {
+		return nil, false
+	}
+	return o.Id, true
+}
+
+// HasId returns a boolean if a field has been set.
+func (o *SpeechResponse) HasId() bool {
+	if o != nil && !IsNil(o.Id) {
+		return true
+	}
+
+	return false
+}
+
+// SetId gets a reference to the given string and assigns it to the Id field.
+func (o *SpeechResponse) SetId(v string) {
+	o.Id = &v
+}
+
+// GetRef returns the Ref field value if set, zero value otherwise.
+func (o *SpeechResponse) GetRef() string {
+	if o == nil || IsNil(o.Ref) {
+		var ret string
+		return ret
+	}
+	return *o.Ref
+}
+
+// GetRefOk returns a tuple with the Ref field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SpeechResponse) GetRefOk() (*string, bool) {
+	if o == nil || IsNil(o.Ref) {
+		return nil, false
+	}
+	return o.Ref, true
+}
+
+// HasRef returns a boolean if a field has been set.
+func (o *SpeechResponse) HasRef() bool {
+	if o != nil && !IsNil(o.Ref) {
+		return true
+	}
+
+	return false
+}
+
+// SetRef gets a reference to the given string and assigns it to the Ref field.
+func (o *SpeechResponse) SetRef(v string) {
+	o.Ref = &v
+}
+
 func (o SpeechResponse) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -112,9 +207,16 @@ func (o SpeechResponse) MarshalJSON() ([]byte, error) {
 
 func (o SpeechResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	toSerialize["openvip"] = o.Openvip
 	toSerialize["status"] = o.Status
 	if !IsNil(o.DurationMs) {
 		toSerialize["duration_ms"] = o.DurationMs
+	}
+	if !IsNil(o.Id) {
+		toSerialize["id"] = o.Id
+	}
+	if !IsNil(o.Ref) {
+		toSerialize["ref"] = o.Ref
 	}
 	return toSerialize, nil
 }
@@ -124,6 +226,7 @@ func (o *SpeechResponse) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
+		"openvip",
 		"status",
 	}
 

@@ -82,10 +82,19 @@ clean_generated() {
             rm -f "$SCRIPT_DIR/python/setup.py" "$SCRIPT_DIR/python/setup.cfg"
             ;;
         dotnet)
-            rm -rf "$SCRIPT_DIR/dotnet/src" "$SCRIPT_DIR/dotnet/docs"
+            rm -rf "$SCRIPT_DIR/dotnet/src/OpenVip/Api" \
+                   "$SCRIPT_DIR/dotnet/src/OpenVip/Client" \
+                   "$SCRIPT_DIR/dotnet/src/OpenVip/Extensions" \
+                   "$SCRIPT_DIR/dotnet/src/OpenVip/Model" \
+                   "$SCRIPT_DIR/dotnet/src/OpenVip.Test/Api" \
+                   "$SCRIPT_DIR/dotnet/src/OpenVip.Test/Model" \
+                   "$SCRIPT_DIR/dotnet/docs"
             ;;
         typescript)
-            rm -rf "$SCRIPT_DIR/typescript/src" "$SCRIPT_DIR/typescript/docs"
+            rm -rf "$SCRIPT_DIR/typescript/src/apis" \
+                   "$SCRIPT_DIR/typescript/src/models" \
+                   "$SCRIPT_DIR/typescript/src/runtime.ts" \
+                   "$SCRIPT_DIR/typescript/docs"
             ;;
         go)
             rm -rf "$SCRIPT_DIR/go/api" "$SCRIPT_DIR/go/docs"

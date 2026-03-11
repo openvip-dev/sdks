@@ -5,16 +5,18 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Openvip** | **string** | Protocol version | 
-**Type** | **string** | Message type | 
+**Type** | **string** |  | 
 **Id** | **string** | Unique message identifier | 
 **Timestamp** | **time.Time** | ISO 8601 timestamp | 
-**Text** | **string** | Transcribed text | 
+**Text** | **string** | Message text content | 
 **Origin** | Pointer to **string** | Producer identifier | [optional] 
 **Language** | Pointer to **string** | BCP 47 language tag | [optional] 
-**Confidence** | Pointer to **float32** | Transcription confidence score | [optional] 
-**Partial** | Pointer to **bool** | If true, this is an incomplete transcription in progress | [optional] 
 **TraceId** | Pointer to **string** | ID of the original message (OpenTelemetry-style) | [optional] 
 **ParentId** | Pointer to **string** | ID of the parent message (OpenTelemetry-style) | [optional] 
+**XInput** | Pointer to [**MessageXInput**](MessageXInput.md) |  | [optional] 
+**XAgentSwitch** | Pointer to [**MessageXAgentSwitch**](MessageXAgentSwitch.md) |  | [optional] 
+**Confidence** | Pointer to **float32** | Transcription confidence score | [optional] 
+**Partial** | Pointer to **bool** | If true, this is an incomplete transcription in progress | [optional] 
 
 ## Methods
 
@@ -185,56 +187,6 @@ SetLanguage sets Language field to given value.
 
 HasLanguage returns a boolean if a field has been set.
 
-### GetConfidence
-
-`func (o *Transcription) GetConfidence() float32`
-
-GetConfidence returns the Confidence field if non-nil, zero value otherwise.
-
-### GetConfidenceOk
-
-`func (o *Transcription) GetConfidenceOk() (*float32, bool)`
-
-GetConfidenceOk returns a tuple with the Confidence field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetConfidence
-
-`func (o *Transcription) SetConfidence(v float32)`
-
-SetConfidence sets Confidence field to given value.
-
-### HasConfidence
-
-`func (o *Transcription) HasConfidence() bool`
-
-HasConfidence returns a boolean if a field has been set.
-
-### GetPartial
-
-`func (o *Transcription) GetPartial() bool`
-
-GetPartial returns the Partial field if non-nil, zero value otherwise.
-
-### GetPartialOk
-
-`func (o *Transcription) GetPartialOk() (*bool, bool)`
-
-GetPartialOk returns a tuple with the Partial field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetPartial
-
-`func (o *Transcription) SetPartial(v bool)`
-
-SetPartial sets Partial field to given value.
-
-### HasPartial
-
-`func (o *Transcription) HasPartial() bool`
-
-HasPartial returns a boolean if a field has been set.
-
 ### GetTraceId
 
 `func (o *Transcription) GetTraceId() string`
@@ -284,6 +236,106 @@ SetParentId sets ParentId field to given value.
 `func (o *Transcription) HasParentId() bool`
 
 HasParentId returns a boolean if a field has been set.
+
+### GetXInput
+
+`func (o *Transcription) GetXInput() MessageXInput`
+
+GetXInput returns the XInput field if non-nil, zero value otherwise.
+
+### GetXInputOk
+
+`func (o *Transcription) GetXInputOk() (*MessageXInput, bool)`
+
+GetXInputOk returns a tuple with the XInput field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetXInput
+
+`func (o *Transcription) SetXInput(v MessageXInput)`
+
+SetXInput sets XInput field to given value.
+
+### HasXInput
+
+`func (o *Transcription) HasXInput() bool`
+
+HasXInput returns a boolean if a field has been set.
+
+### GetXAgentSwitch
+
+`func (o *Transcription) GetXAgentSwitch() MessageXAgentSwitch`
+
+GetXAgentSwitch returns the XAgentSwitch field if non-nil, zero value otherwise.
+
+### GetXAgentSwitchOk
+
+`func (o *Transcription) GetXAgentSwitchOk() (*MessageXAgentSwitch, bool)`
+
+GetXAgentSwitchOk returns a tuple with the XAgentSwitch field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetXAgentSwitch
+
+`func (o *Transcription) SetXAgentSwitch(v MessageXAgentSwitch)`
+
+SetXAgentSwitch sets XAgentSwitch field to given value.
+
+### HasXAgentSwitch
+
+`func (o *Transcription) HasXAgentSwitch() bool`
+
+HasXAgentSwitch returns a boolean if a field has been set.
+
+### GetConfidence
+
+`func (o *Transcription) GetConfidence() float32`
+
+GetConfidence returns the Confidence field if non-nil, zero value otherwise.
+
+### GetConfidenceOk
+
+`func (o *Transcription) GetConfidenceOk() (*float32, bool)`
+
+GetConfidenceOk returns a tuple with the Confidence field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetConfidence
+
+`func (o *Transcription) SetConfidence(v float32)`
+
+SetConfidence sets Confidence field to given value.
+
+### HasConfidence
+
+`func (o *Transcription) HasConfidence() bool`
+
+HasConfidence returns a boolean if a field has been set.
+
+### GetPartial
+
+`func (o *Transcription) GetPartial() bool`
+
+GetPartial returns the Partial field if non-nil, zero value otherwise.
+
+### GetPartialOk
+
+`func (o *Transcription) GetPartialOk() (*bool, bool)`
+
+GetPartialOk returns a tuple with the Partial field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetPartial
+
+`func (o *Transcription) SetPartial(v bool)`
+
+SetPartial sets Partial field to given value.
+
+### HasPartial
+
+`func (o *Transcription) HasPartial() bool`
+
+HasPartial returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

@@ -7,8 +7,11 @@ Speech synthesis response
 
 Name | Type
 ------------ | -------------
+`openvip` | string
 `status` | string
 `durationMs` | number
+`id` | string
+`ref` | string
 
 ## Example
 
@@ -17,8 +20,11 @@ import type { SpeechResponse } from 'openvip'
 
 // TODO: Update the object below with actual values
 const example = {
+  "openvip": null,
   "status": null,
   "durationMs": null,
+  "id": null,
+  "ref": null,
 } satisfies SpeechResponse
 
 console.log(example)

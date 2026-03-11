@@ -1,6 +1,6 @@
 # OpenVip.Api.MessagesApi
 
-All URIs are relative to *http://localhost:8770*
+All URIs are relative to *http://localhost:8770/openvip*
 
 | Method | HTTP request | Description |
 |--------|--------------|-------------|
@@ -9,7 +9,7 @@ All URIs are relative to *http://localhost:8770*
 
 <a id="sendmessage"></a>
 # **SendMessage**
-> Ack SendMessage (string agentId, Transcription transcription)
+> Response SendMessage (string agentId, Message message)
 
 Send message to agent
 
@@ -21,11 +21,11 @@ Send a voice interaction message to a specific agent. The agent must be connecte
 | Name | Type | Description | Notes |
 |------|------|-------------|-------|
 | **agentId** | **string** | Agent identifier |  |
-| **transcription** | [**Transcription**](Transcription.md) |  |  |
+| **message** | [**Message**](Message.md) |  |  |
 
 ### Return type
 
-[**Ack**](Ack.md)
+[**Response**](Response.md)
 
 ### Authorization
 

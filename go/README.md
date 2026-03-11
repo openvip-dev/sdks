@@ -4,21 +4,30 @@ Open Voice Interaction Protocol (OpenVIP) HTTP API specification.
 
 This API allows applications to send and receive voice interaction messages.
 
+## Base Path
+
+The OpenVIP protocol defines **relative paths** only. The base path is
+**implementation-defined** — implementations choose where to mount these
+endpoints. The recommended base path is `/openvip/`.
+
+Implementations SHOULD serve this OpenAPI spec at `{base_path}/openapi.json`
+for discovery (e.g. `GET /openvip/openapi.json`).
+
 ## Quick Start
 
 ```bash
 # Subscribe to messages (SSE) — this IS the registration
-curl http://localhost:8770/agents/my-agent-id/messages
+curl http://localhost:8770/openvip/agents/my-agent-id/messages
 
 # Send a message to an agent
-curl -X POST http://localhost:8770/agents/my-agent-id/messages \\
+curl -X POST http://localhost:8770/openvip/agents/my-agent-id/messages \\
   -H \"Content-Type: application/json\" \\
   -d '{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}'
 
 # Text-to-speech
-curl -X POST http://localhost:8770/speech \\
+curl -X POST http://localhost:8770/openvip/speech \\
   -H \"Content-Type: application/json\" \\
-  -d '{\"openvip\": \"1.0\", \"type\": \"speech\", \"text\": \"hello world\", \"language\": \"en\"}'
+  -d '{\"openvip\": \"1.0\", \"type\": \"speech\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:05Z\", \"text\": \"hello world\", \"language\": \"en\"}'
 ```
 
 ## Agent Lifecycle
@@ -49,7 +58,7 @@ go get golang.org/x/net/context
 Put the package under your project folder and add the following in import:
 
 ```go
-import openvip "github.com/openvip-dev/sdks"
+import openvip "github.com/GIT_USER_ID/GIT_REPO_ID"
 ```
 
 To use a proxy, set the environment variable `HTTP_PROXY`:
@@ -101,13 +110,14 @@ ctx = context.WithValue(context.Background(), openvip.ContextOperationServerVari
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *http://localhost:8770*
+All URIs are relative to *http://localhost:8770/openvip*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 *ControlAPI* | [**SendControl**](docs/ControlAPI.md#sendcontrol) | **Post** /control | Send control command
 *MessagesAPI* | [**SendMessage**](docs/MessagesAPI.md#sendmessage) | **Post** /agents/{agent_id}/messages | Send message to agent
 *MessagesAPI* | [**SubscribeAgent**](docs/MessagesAPI.md#subscribeagent) | **Get** /agents/{agent_id}/messages | Subscribe to agent messages (SSE)
+*SpeechAPI* | [**StopSpeech**](docs/SpeechAPI.md#stopspeech) | **Post** /speech/stop | Stop TTS playback
 *SpeechAPI* | [**TextToSpeech**](docs/SpeechAPI.md#texttospeech) | **Post** /speech | Text-to-speech request
 *StatusAPI* | [**GetStatus**](docs/StatusAPI.md#getstatus) | **Get** /status | Get engine status
 *StatusAPI* | [**SubscribeStatus**](docs/StatusAPI.md#subscribestatus) | **Get** /status/stream | Subscribe to status changes (SSE)
@@ -115,12 +125,17 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
- - [Ack](docs/Ack.md)
  - [ControlRequest](docs/ControlRequest.md)
  - [Error](docs/Error.md)
+ - [Message](docs/Message.md)
+ - [MessageXAgentSwitch](docs/MessageXAgentSwitch.md)
+ - [MessageXInput](docs/MessageXInput.md)
+ - [Response](docs/Response.md)
  - [SpeechRequest](docs/SpeechRequest.md)
  - [SpeechResponse](docs/SpeechResponse.md)
  - [Status](docs/Status.md)
+ - [StatusStt](docs/StatusStt.md)
+ - [StatusTts](docs/StatusTts.md)
  - [Transcription](docs/Transcription.md)
 
 

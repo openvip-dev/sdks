@@ -1,6 +1,6 @@
 # OpenVip.Api.StatusApi
 
-All URIs are relative to *http://localhost:8770*
+All URIs are relative to *http://localhost:8770/openvip*
 
 | Method | HTTP request | Description |
 |--------|--------------|-------------|
@@ -45,7 +45,7 @@ No authorization required
 
 Subscribe to status changes (SSE)
 
-Server-Sent Events stream that pushes status updates on state transitions.  Events are sent when `state`, `connected_agents`, or other discrete fields change. Continuously changing fields (e.g., `uptime_seconds`) do not trigger events.  The payload of each event is a `Status` object — the same schema as the `GET /status` response.  Keepalive comments (`: keepalive`) are sent every 30 seconds if no events occur.  Clients that cannot use SSE should fall back to polling `GET /status`. 
+Server-Sent Events stream that pushes status updates on state transitions.  Events are sent when `stt`, `tts`, `connected_agents`, or other discrete fields change. Continuously changing fields (e.g., `uptime_seconds`) do not trigger events.  The payload of each event is a `Status` object — the same schema as the `GET /status` response.  Keepalive comments (`: keepalive`) are sent every 30 seconds if no events occur.  Clients that cannot use SSE should fall back to polling `GET /status`. 
 
 
 ### Parameters

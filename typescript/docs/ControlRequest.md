@@ -7,6 +7,8 @@ Control command request
 
 Name | Type
 ------------ | -------------
+`openvip` | string
+`id` | string
 `command` | string
 
 ## Example
@@ -16,6 +18,8 @@ import type { ControlRequest } from 'openvip'
 
 // TODO: Update the object below with actual values
 const example = {
+  "openvip": null,
+  "id": null,
   "command": null,
 } satisfies ControlRequest
 

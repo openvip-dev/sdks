@@ -9,8 +9,16 @@ Name | Type
 ------------ | -------------
 `openvip` | string
 `type` | string
+`id` | string
+`timestamp` | Date
 `text` | string
+`origin` | string
 `language` | string
+`traceId` | string
+`parentId` | string
+`xInput` | [MessageXInput](MessageXInput.md)
+`xAgentSwitch` | [MessageXAgentSwitch](MessageXAgentSwitch.md)
+`voice` | string
 
 ## Example
 
@@ -19,10 +27,18 @@ import type { SpeechRequest } from 'openvip'
 
 // TODO: Update the object below with actual values
 const example = {
-  "openvip": 1.0,
+  "openvip": null,
   "type": null,
-  "text": Light turned on,
+  "id": null,
+  "timestamp": null,
+  "text": null,
+  "origin": myapp/1.0.0,
   "language": en,
+  "traceId": null,
+  "parentId": null,
+  "xInput": null,
+  "xAgentSwitch": null,
+  "voice": af_sky,
 } satisfies SpeechRequest
 
 console.log(example)

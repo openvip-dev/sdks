@@ -2,7 +2,7 @@
 /* eslint-disable */
 /**
  * OpenVIP API
- * Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d \'{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}\'  # Text-to-speech curl -X POST http://localhost:8770/speech \\   -H \"Content-Type: application/json\" \\   -d \'{\"openvip\": \"1.0\", \"type\": \"speech\", \"text\": \"hello world\", \"language\": \"en\"}\' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
+ * Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Base Path  The OpenVIP protocol defines **relative paths** only. The base path is **implementation-defined** — implementations choose where to mount these endpoints. The recommended base path is `/openvip/`.  Implementations SHOULD serve this OpenAPI spec at `{base_path}/openapi.json` for discovery (e.g. `GET /openvip/openapi.json`).  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/openvip/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/openvip/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d \'{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}\'  # Text-to-speech curl -X POST http://localhost:8770/openvip/speech \\   -H \"Content-Type: application/json\" \\   -d \'{\"openvip\": \"1.0\", \"type\": \"speech\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:05Z\", \"text\": \"hello world\", \"language\": \"en\"}\' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -13,6 +13,21 @@
  */
 
 import { mapValues } from '../runtime';
+import type { StatusStt } from './StatusStt';
+import {
+    StatusSttFromJSON,
+    StatusSttFromJSONTyped,
+    StatusSttToJSON,
+    StatusSttToJSONTyped,
+} from './StatusStt';
+import type { StatusTts } from './StatusTts';
+import {
+    StatusTtsFromJSON,
+    StatusTtsFromJSONTyped,
+    StatusTtsToJSON,
+    StatusTtsToJSONTyped,
+} from './StatusTts';
+
 /**
  * Engine status
  * @export
@@ -20,17 +35,23 @@ import { mapValues } from '../runtime';
  */
 export interface Status {
     /**
-     * Supported OpenVIP protocol version
-     * @type {string}
+     * Protocol version
+     * @type {StatusOpenvipEnum}
      * @memberof Status
      */
-    protocolVersion?: string;
+    openvip: StatusOpenvipEnum;
     /**
-     * Current engine state
-     * @type {string}
+     * 
+     * @type {StatusStt}
      * @memberof Status
      */
-    state?: string;
+    stt?: StatusStt;
+    /**
+     * 
+     * @type {StatusTts}
+     * @memberof Status
+     */
+    tts?: StatusTts;
     /**
      * List of connected agent identifiers
      * @type {Array<string>}
@@ -45,10 +66,21 @@ export interface Status {
     platform?: { [key: string]: any; };
 }
 
+
+/**
+ * @export
+ */
+export const StatusOpenvipEnum = {
+    _10: '1.0'
+} as const;
+export type StatusOpenvipEnum = typeof StatusOpenvipEnum[keyof typeof StatusOpenvipEnum];
+
+
 /**
  * Check if a given object implements the Status interface.
  */
 export function instanceOfStatus(value: object): value is Status {
+    if (!('openvip' in value) || value['openvip'] === undefined) return false;
     return true;
 }
 
@@ -62,8 +94,9 @@ export function StatusFromJSONTyped(json: any, ignoreDiscriminator: boolean): St
     }
     return {
         
-        'protocolVersion': json['protocol_version'] == null ? undefined : json['protocol_version'],
-        'state': json['state'] == null ? undefined : json['state'],
+        'openvip': json['openvip'],
+        'stt': json['stt'] == null ? undefined : StatusSttFromJSON(json['stt']),
+        'tts': json['tts'] == null ? undefined : StatusTtsFromJSON(json['tts']),
         'connectedAgents': json['connected_agents'] == null ? undefined : json['connected_agents'],
         'platform': json['platform'] == null ? undefined : json['platform'],
     };
@@ -80,8 +113,9 @@ export function StatusToJSONTyped(value?: Status | null, ignoreDiscriminator: bo
 
     return {
         
-        'protocol_version': value['protocolVersion'],
-        'state': value['state'],
+        'openvip': value['openvip'],
+        'stt': StatusSttToJSON(value['stt']),
+        'tts': StatusTtsToJSON(value['tts']),
         'connected_agents': value['connectedAgents'],
         'platform': value['platform'],
     };

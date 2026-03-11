@@ -1,6 +1,6 @@
 # ControlApi
 
-All URIs are relative to *http://localhost:8770*
+All URIs are relative to *http://localhost:8770/openvip*
 
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
@@ -10,7 +10,7 @@ All URIs are relative to *http://localhost:8770*
 
 ## sendControl
 
-> Ack sendControl(controlRequest)
+> Response sendControl(controlRequest)
 
 Send control command
 
@@ -31,7 +31,7 @@ async function example() {
 
   const body = {
     // ControlRequest
-    controlRequest: {"command":"stt.stop"},
+    controlRequest: {"openvip":"1.0","id":"770e8400-e29b-41d4-a716-446655440000","command":"stt.stop"},
   } satisfies SendControlRequest;
 
   try {
@@ -55,7 +55,7 @@ example().catch(console.error);
 
 ### Return type
 
-[**Ack**](Ack.md)
+[**Response**](Response.md)
 
 ### Authorization
 

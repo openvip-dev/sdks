@@ -25,11 +25,13 @@ import { createSpeechRequest } from "./messages";
 import type {
   Status,
   SpeechResponse,
-  Ack,
+  Response as AckResponse,
   Transcription,
   SpeechRequest,
 } from "./models";
 import {
+  ControlRequestOpenvipEnum,
+  ControlRequestCommandEnum,
   TranscriptionFromJSON,
   SpeechRequestFromJSON,
   StatusFromJSON,
@@ -106,34 +108,38 @@ export class Client {
   // --- Control ---
 
   /** Send a control command. */
-  async control(command: string): Promise<Ack> {
+  async control(command: string): Promise<AckResponse> {
     return this.controlApi.sendControl({
-      controlRequest: { command: command as any },
+      controlRequest: {
+        openvip: ControlRequestOpenvipEnum._10,
+        id: crypto.randomUUID(),
+        command: command as ControlRequestCommandEnum,
+      },
     });
   }
 
   /** Start speech-to-text. */
-  async startListening(): Promise<Ack> {
+  async startListening(): Promise<AckResponse> {
     return this.control("stt.start");
   }
 
   /** Stop speech-to-text. */
-  async stopListening(): Promise<Ack> {
+  async stopListening(): Promise<AckResponse> {
     return this.control("stt.stop");
   }
 
   /** Request engine shutdown. */
-  async shutdown(): Promise<Ack> {
+  async shutdown(): Promise<AckResponse> {
     return this.control("engine.shutdown");
   }
 
   // --- Messages ---
 
   /** Send a message to a connected agent. */
-  async sendMessage(agentId: string, message: Transcription): Promise<Ack> {
+  async sendMessage(agentId: string, message: Transcription): Promise<AckResponse> {
     return this.messagesApi.sendMessage({
       agentId,
-      transcription: message,
+      message,
     });
   }
 

@@ -1,6 +1,6 @@
 # \ControlAPI
 
-All URIs are relative to *http://localhost:8770*
+All URIs are relative to *http://localhost:8770/openvip*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 ## SendControl
 
-> Ack SendControl(ctx).ControlRequest(controlRequest).Execute()
+> Response SendControl(ctx).ControlRequest(controlRequest).Execute()
 
 Send control command
 
@@ -25,11 +25,11 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/openvip-dev/sdks"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
 )
 
 func main() {
-	controlRequest := *openapiclient.NewControlRequest("Command_example") // ControlRequest | 
+	controlRequest := *openapiclient.NewControlRequest("Openvip_example", "Id_example", "Command_example") // ControlRequest | 
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -38,7 +38,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error when calling `ControlAPI.SendControl``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `SendControl`: Ack
+	// response from `SendControl`: Response
 	fmt.Fprintf(os.Stdout, "Response from `ControlAPI.SendControl`: %v\n", resp)
 }
 ```
@@ -58,7 +58,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**Ack**](Ack.md)
+[**Response**](Response.md)
 
 ### Authorization
 

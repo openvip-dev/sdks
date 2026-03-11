@@ -1,7 +1,7 @@
 /*
 OpenVIP API
 
-Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}'  # Text-to-speech curl -X POST http://localhost:8770/speech \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"speech\", \"text\": \"hello world\", \"language\": \"en\"}' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
+Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Base Path  The OpenVIP protocol defines **relative paths** only. The base path is **implementation-defined** — implementations choose where to mount these endpoints. The recommended base path is `/openvip/`.  Implementations SHOULD serve this OpenAPI spec at `{base_path}/openapi.json` for discovery (e.g. `GET /openvip/openapi.json`).  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/openvip/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/openvip/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}'  # Text-to-speech curl -X POST http://localhost:8770/openvip/speech \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"speech\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:05Z\", \"text\": \"hello world\", \"language\": \"en\"}' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
 
 API version: 1.0
 */
@@ -27,15 +27,15 @@ type ApiSendMessageRequest struct {
 	ctx context.Context
 	ApiService *MessagesAPIService
 	agentId string
-	transcription *Transcription
+	message *Message
 }
 
-func (r ApiSendMessageRequest) Transcription(transcription Transcription) ApiSendMessageRequest {
-	r.transcription = &transcription
+func (r ApiSendMessageRequest) Message(message Message) ApiSendMessageRequest {
+	r.message = &message
 	return r
 }
 
-func (r ApiSendMessageRequest) Execute() (*Ack, *http.Response, error) {
+func (r ApiSendMessageRequest) Execute() (*Response, *http.Response, error) {
 	return r.ApiService.SendMessageExecute(r)
 }
 
@@ -59,13 +59,13 @@ func (a *MessagesAPIService) SendMessage(ctx context.Context, agentId string) Ap
 }
 
 // Execute executes the request
-//  @return Ack
-func (a *MessagesAPIService) SendMessageExecute(r ApiSendMessageRequest) (*Ack, *http.Response, error) {
+//  @return Response
+func (a *MessagesAPIService) SendMessageExecute(r ApiSendMessageRequest) (*Response, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  *Ack
+		localVarReturnValue  *Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "MessagesAPIService.SendMessage")
@@ -79,8 +79,8 @@ func (a *MessagesAPIService) SendMessageExecute(r ApiSendMessageRequest) (*Ack, 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.transcription == nil {
-		return localVarReturnValue, nil, reportError("transcription is required and must be specified")
+	if r.message == nil {
+		return localVarReturnValue, nil, reportError("message is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -101,7 +101,7 @@ func (a *MessagesAPIService) SendMessageExecute(r ApiSendMessageRequest) (*Ack, 
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	// body params
-	localVarPostBody = r.transcription
+	localVarPostBody = r.message
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err

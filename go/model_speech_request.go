@@ -1,7 +1,7 @@
 /*
 OpenVIP API
 
-Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}'  # Text-to-speech curl -X POST http://localhost:8770/speech \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"speech\", \"text\": \"hello world\", \"language\": \"en\"}' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
+Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Base Path  The OpenVIP protocol defines **relative paths** only. The base path is **implementation-defined** — implementations choose where to mount these endpoints. The recommended base path is `/openvip/`.  Implementations SHOULD serve this OpenAPI spec at `{base_path}/openapi.json` for discovery (e.g. `GET /openvip/openapi.json`).  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/openvip/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/openvip/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}'  # Text-to-speech curl -X POST http://localhost:8770/openvip/speech \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"speech\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:05Z\", \"text\": \"hello world\", \"language\": \"en\"}' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
 
 API version: 1.0
 */
@@ -12,6 +12,8 @@ package openvip
 
 import (
 	"encoding/json"
+	"time"
+	"bytes"
 	"fmt"
 )
 
@@ -22,13 +24,25 @@ var _ MappedNullable = &SpeechRequest{}
 type SpeechRequest struct {
 	// Protocol version
 	Openvip string `json:"openvip"`
-	// Message type
 	Type string `json:"type"`
-	// Text to synthesize
+	// Unique message identifier
+	Id string `json:"id"`
+	// ISO 8601 timestamp
+	Timestamp time.Time `json:"timestamp"`
+	// Message text content
 	Text string `json:"text"`
+	// Producer identifier
+	Origin *string `json:"origin,omitempty"`
 	// BCP 47 language tag
 	Language *string `json:"language,omitempty" validate:"regexp=^[a-z]{2}(-[A-Z]{2})?$"`
-	AdditionalProperties map[string]interface{}
+	// ID of the original message (OpenTelemetry-style)
+	TraceId *string `json:"trace_id,omitempty"`
+	// ID of the parent message (OpenTelemetry-style)
+	ParentId *string `json:"parent_id,omitempty"`
+	XInput *MessageXInput `json:"x_input,omitempty"`
+	XAgentSwitch *MessageXAgentSwitch `json:"x_agent_switch,omitempty"`
+	// Voice identifier (engine-specific, e.g. \"af_sky\" for Kokoro)
+	Voice *string `json:"voice,omitempty"`
 }
 
 type _SpeechRequest SpeechRequest
@@ -37,10 +51,12 @@ type _SpeechRequest SpeechRequest
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSpeechRequest(openvip string, type_ string, text string) *SpeechRequest {
+func NewSpeechRequest(openvip string, type_ string, id string, timestamp time.Time, text string) *SpeechRequest {
 	this := SpeechRequest{}
 	this.Openvip = openvip
 	this.Type = type_
+	this.Id = id
+	this.Timestamp = timestamp
 	this.Text = text
 	return &this
 }
@@ -101,6 +117,54 @@ func (o *SpeechRequest) SetType(v string) {
 	o.Type = v
 }
 
+// GetId returns the Id field value
+func (o *SpeechRequest) GetId() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Id
+}
+
+// GetIdOk returns a tuple with the Id field value
+// and a boolean to check if the value has been set.
+func (o *SpeechRequest) GetIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Id, true
+}
+
+// SetId sets field value
+func (o *SpeechRequest) SetId(v string) {
+	o.Id = v
+}
+
+// GetTimestamp returns the Timestamp field value
+func (o *SpeechRequest) GetTimestamp() time.Time {
+	if o == nil {
+		var ret time.Time
+		return ret
+	}
+
+	return o.Timestamp
+}
+
+// GetTimestampOk returns a tuple with the Timestamp field value
+// and a boolean to check if the value has been set.
+func (o *SpeechRequest) GetTimestampOk() (*time.Time, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Timestamp, true
+}
+
+// SetTimestamp sets field value
+func (o *SpeechRequest) SetTimestamp(v time.Time) {
+	o.Timestamp = v
+}
+
 // GetText returns the Text field value
 func (o *SpeechRequest) GetText() string {
 	if o == nil {
@@ -123,6 +187,38 @@ func (o *SpeechRequest) GetTextOk() (*string, bool) {
 // SetText sets field value
 func (o *SpeechRequest) SetText(v string) {
 	o.Text = v
+}
+
+// GetOrigin returns the Origin field value if set, zero value otherwise.
+func (o *SpeechRequest) GetOrigin() string {
+	if o == nil || IsNil(o.Origin) {
+		var ret string
+		return ret
+	}
+	return *o.Origin
+}
+
+// GetOriginOk returns a tuple with the Origin field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SpeechRequest) GetOriginOk() (*string, bool) {
+	if o == nil || IsNil(o.Origin) {
+		return nil, false
+	}
+	return o.Origin, true
+}
+
+// HasOrigin returns a boolean if a field has been set.
+func (o *SpeechRequest) HasOrigin() bool {
+	if o != nil && !IsNil(o.Origin) {
+		return true
+	}
+
+	return false
+}
+
+// SetOrigin gets a reference to the given string and assigns it to the Origin field.
+func (o *SpeechRequest) SetOrigin(v string) {
+	o.Origin = &v
 }
 
 // GetLanguage returns the Language field value if set, zero value otherwise.
@@ -157,6 +253,166 @@ func (o *SpeechRequest) SetLanguage(v string) {
 	o.Language = &v
 }
 
+// GetTraceId returns the TraceId field value if set, zero value otherwise.
+func (o *SpeechRequest) GetTraceId() string {
+	if o == nil || IsNil(o.TraceId) {
+		var ret string
+		return ret
+	}
+	return *o.TraceId
+}
+
+// GetTraceIdOk returns a tuple with the TraceId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SpeechRequest) GetTraceIdOk() (*string, bool) {
+	if o == nil || IsNil(o.TraceId) {
+		return nil, false
+	}
+	return o.TraceId, true
+}
+
+// HasTraceId returns a boolean if a field has been set.
+func (o *SpeechRequest) HasTraceId() bool {
+	if o != nil && !IsNil(o.TraceId) {
+		return true
+	}
+
+	return false
+}
+
+// SetTraceId gets a reference to the given string and assigns it to the TraceId field.
+func (o *SpeechRequest) SetTraceId(v string) {
+	o.TraceId = &v
+}
+
+// GetParentId returns the ParentId field value if set, zero value otherwise.
+func (o *SpeechRequest) GetParentId() string {
+	if o == nil || IsNil(o.ParentId) {
+		var ret string
+		return ret
+	}
+	return *o.ParentId
+}
+
+// GetParentIdOk returns a tuple with the ParentId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SpeechRequest) GetParentIdOk() (*string, bool) {
+	if o == nil || IsNil(o.ParentId) {
+		return nil, false
+	}
+	return o.ParentId, true
+}
+
+// HasParentId returns a boolean if a field has been set.
+func (o *SpeechRequest) HasParentId() bool {
+	if o != nil && !IsNil(o.ParentId) {
+		return true
+	}
+
+	return false
+}
+
+// SetParentId gets a reference to the given string and assigns it to the ParentId field.
+func (o *SpeechRequest) SetParentId(v string) {
+	o.ParentId = &v
+}
+
+// GetXInput returns the XInput field value if set, zero value otherwise.
+func (o *SpeechRequest) GetXInput() MessageXInput {
+	if o == nil || IsNil(o.XInput) {
+		var ret MessageXInput
+		return ret
+	}
+	return *o.XInput
+}
+
+// GetXInputOk returns a tuple with the XInput field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SpeechRequest) GetXInputOk() (*MessageXInput, bool) {
+	if o == nil || IsNil(o.XInput) {
+		return nil, false
+	}
+	return o.XInput, true
+}
+
+// HasXInput returns a boolean if a field has been set.
+func (o *SpeechRequest) HasXInput() bool {
+	if o != nil && !IsNil(o.XInput) {
+		return true
+	}
+
+	return false
+}
+
+// SetXInput gets a reference to the given MessageXInput and assigns it to the XInput field.
+func (o *SpeechRequest) SetXInput(v MessageXInput) {
+	o.XInput = &v
+}
+
+// GetXAgentSwitch returns the XAgentSwitch field value if set, zero value otherwise.
+func (o *SpeechRequest) GetXAgentSwitch() MessageXAgentSwitch {
+	if o == nil || IsNil(o.XAgentSwitch) {
+		var ret MessageXAgentSwitch
+		return ret
+	}
+	return *o.XAgentSwitch
+}
+
+// GetXAgentSwitchOk returns a tuple with the XAgentSwitch field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SpeechRequest) GetXAgentSwitchOk() (*MessageXAgentSwitch, bool) {
+	if o == nil || IsNil(o.XAgentSwitch) {
+		return nil, false
+	}
+	return o.XAgentSwitch, true
+}
+
+// HasXAgentSwitch returns a boolean if a field has been set.
+func (o *SpeechRequest) HasXAgentSwitch() bool {
+	if o != nil && !IsNil(o.XAgentSwitch) {
+		return true
+	}
+
+	return false
+}
+
+// SetXAgentSwitch gets a reference to the given MessageXAgentSwitch and assigns it to the XAgentSwitch field.
+func (o *SpeechRequest) SetXAgentSwitch(v MessageXAgentSwitch) {
+	o.XAgentSwitch = &v
+}
+
+// GetVoice returns the Voice field value if set, zero value otherwise.
+func (o *SpeechRequest) GetVoice() string {
+	if o == nil || IsNil(o.Voice) {
+		var ret string
+		return ret
+	}
+	return *o.Voice
+}
+
+// GetVoiceOk returns a tuple with the Voice field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SpeechRequest) GetVoiceOk() (*string, bool) {
+	if o == nil || IsNil(o.Voice) {
+		return nil, false
+	}
+	return o.Voice, true
+}
+
+// HasVoice returns a boolean if a field has been set.
+func (o *SpeechRequest) HasVoice() bool {
+	if o != nil && !IsNil(o.Voice) {
+		return true
+	}
+
+	return false
+}
+
+// SetVoice gets a reference to the given string and assigns it to the Voice field.
+func (o *SpeechRequest) SetVoice(v string) {
+	o.Voice = &v
+}
+
 func (o SpeechRequest) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -169,15 +425,30 @@ func (o SpeechRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["openvip"] = o.Openvip
 	toSerialize["type"] = o.Type
+	toSerialize["id"] = o.Id
+	toSerialize["timestamp"] = o.Timestamp
 	toSerialize["text"] = o.Text
+	if !IsNil(o.Origin) {
+		toSerialize["origin"] = o.Origin
+	}
 	if !IsNil(o.Language) {
 		toSerialize["language"] = o.Language
 	}
-
-	for key, value := range o.AdditionalProperties {
-		toSerialize[key] = value
+	if !IsNil(o.TraceId) {
+		toSerialize["trace_id"] = o.TraceId
 	}
-
+	if !IsNil(o.ParentId) {
+		toSerialize["parent_id"] = o.ParentId
+	}
+	if !IsNil(o.XInput) {
+		toSerialize["x_input"] = o.XInput
+	}
+	if !IsNil(o.XAgentSwitch) {
+		toSerialize["x_agent_switch"] = o.XAgentSwitch
+	}
+	if !IsNil(o.Voice) {
+		toSerialize["voice"] = o.Voice
+	}
 	return toSerialize, nil
 }
 
@@ -188,6 +459,8 @@ func (o *SpeechRequest) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"openvip",
 		"type",
+		"id",
+		"timestamp",
 		"text",
 	}
 
@@ -207,23 +480,15 @@ func (o *SpeechRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varSpeechRequest := _SpeechRequest{}
 
-	err = json.Unmarshal(data, &varSpeechRequest)
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&varSpeechRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = SpeechRequest(varSpeechRequest)
-
-	additionalProperties := make(map[string]interface{})
-
-	if err = json.Unmarshal(data, &additionalProperties); err == nil {
-		delete(additionalProperties, "openvip")
-		delete(additionalProperties, "type")
-		delete(additionalProperties, "text")
-		delete(additionalProperties, "language")
-		o.AdditionalProperties = additionalProperties
-	}
 
 	return err
 }

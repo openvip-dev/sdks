@@ -2,7 +2,7 @@
 /* eslint-disable */
 /**
  * OpenVIP API
- * Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d \'{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}\'  # Text-to-speech curl -X POST http://localhost:8770/speech \\   -H \"Content-Type: application/json\" \\   -d \'{\"openvip\": \"1.0\", \"type\": \"speech\", \"text\": \"hello world\", \"language\": \"en\"}\' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
+ * Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Base Path  The OpenVIP protocol defines **relative paths** only. The base path is **implementation-defined** — implementations choose where to mount these endpoints. The recommended base path is `/openvip/`.  Implementations SHOULD serve this OpenAPI spec at `{base_path}/openapi.json` for discovery (e.g. `GET /openvip/openapi.json`).  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/openvip/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/openvip/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d \'{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}\'  # Text-to-speech curl -X POST http://localhost:8770/openvip/speech \\   -H \"Content-Type: application/json\" \\   -d \'{\"openvip\": \"1.0\", \"type\": \"speech\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:05Z\", \"text\": \"hello world\", \"language\": \"en\"}\' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -20,6 +20,18 @@ import { mapValues } from '../runtime';
  */
 export interface ControlRequest {
     /**
+     * Protocol version
+     * @type {ControlRequestOpenvipEnum}
+     * @memberof ControlRequest
+     */
+    openvip: ControlRequestOpenvipEnum;
+    /**
+     * Unique request identifier (UUID v4)
+     * @type {string}
+     * @memberof ControlRequest
+     */
+    id: string;
+    /**
      * Command to execute
      * @type {ControlRequestCommandEnum}
      * @memberof ControlRequest
@@ -27,6 +39,14 @@ export interface ControlRequest {
     command: ControlRequestCommandEnum;
 }
 
+
+/**
+ * @export
+ */
+export const ControlRequestOpenvipEnum = {
+    _10: '1.0'
+} as const;
+export type ControlRequestOpenvipEnum = typeof ControlRequestOpenvipEnum[keyof typeof ControlRequestOpenvipEnum];
 
 /**
  * @export
@@ -43,6 +63,8 @@ export type ControlRequestCommandEnum = typeof ControlRequestCommandEnum[keyof t
  * Check if a given object implements the ControlRequest interface.
  */
 export function instanceOfControlRequest(value: object): value is ControlRequest {
+    if (!('openvip' in value) || value['openvip'] === undefined) return false;
+    if (!('id' in value) || value['id'] === undefined) return false;
     if (!('command' in value) || value['command'] === undefined) return false;
     return true;
 }
@@ -57,6 +79,8 @@ export function ControlRequestFromJSONTyped(json: any, ignoreDiscriminator: bool
     }
     return {
         
+        'openvip': json['openvip'],
+        'id': json['id'],
         'command': json['command'],
     };
 }
@@ -72,6 +96,8 @@ export function ControlRequestToJSONTyped(value?: ControlRequest | null, ignoreD
 
     return {
         
+        'openvip': value['openvip'],
+        'id': value['id'],
         'command': value['command'],
     };
 }

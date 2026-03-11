@@ -35,16 +35,18 @@ class TestMessageXInput(unittest.TestCase):
         model = MessageXInput()
         if include_optional:
             return MessageXInput(
-                submit = True,
-                newline = True,
+                ops = [
+                    'submit'
+                    ],
                 trigger = '',
                 confidence = 0,
                 source = ''
             )
         else:
             return MessageXInput(
-                submit = True,
-                newline = True,
+                ops = [
+                    'submit'
+                    ],
         )
         """
 

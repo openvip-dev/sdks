@@ -14,10 +14,12 @@ Name | Type
 `text` | string
 `origin` | string
 `language` | string
-`confidence` | number
-`partial` | boolean
 `traceId` | string
 `parentId` | string
+`xInput` | [MessageXInput](MessageXInput.md)
+`xAgentSwitch` | [MessageXAgentSwitch](MessageXAgentSwitch.md)
+`confidence` | number
+`partial` | boolean
 
 ## Example
 
@@ -26,17 +28,19 @@ import type { Transcription } from 'openvip'
 
 // TODO: Update the object below with actual values
 const example = {
-  "openvip": 1.0,
+  "openvip": null,
   "type": null,
   "id": null,
   "timestamp": null,
-  "text": turn on the light,
+  "text": null,
   "origin": myapp/1.0.0,
   "language": en,
-  "confidence": null,
-  "partial": null,
   "traceId": null,
   "parentId": null,
+  "xInput": null,
+  "xAgentSwitch": null,
+  "confidence": null,
+  "partial": null,
 } satisfies Transcription
 
 console.log(example)

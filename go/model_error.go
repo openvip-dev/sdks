@@ -1,7 +1,7 @@
 /*
 OpenVIP API
 
-Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}'  # Text-to-speech curl -X POST http://localhost:8770/speech \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"speech\", \"text\": \"hello world\", \"language\": \"en\"}' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
+Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Base Path  The OpenVIP protocol defines **relative paths** only. The base path is **implementation-defined** — implementations choose where to mount these endpoints. The recommended base path is `/openvip/`.  Implementations SHOULD serve this OpenAPI spec at `{base_path}/openapi.json` for discovery (e.g. `GET /openvip/openapi.json`).  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/openvip/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/openvip/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}'  # Text-to-speech curl -X POST http://localhost:8770/openvip/speech \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"speech\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:05Z\", \"text\": \"hello world\", \"language\": \"en\"}' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
 
 API version: 1.0
 */
@@ -21,10 +21,16 @@ var _ MappedNullable = &Error{}
 
 // Error Error response
 type Error struct {
+	// Protocol version
+	Openvip string `json:"openvip"`
 	// Human-readable error message
 	Error string `json:"error"`
 	// Machine-readable error code
 	Code *string `json:"code,omitempty"`
+	// Unique identifier for this error (assigned by the engine)
+	Id *string `json:"id,omitempty"`
+	// ID of the request that caused this error
+	Ref *string `json:"ref,omitempty"`
 }
 
 type _Error Error
@@ -33,8 +39,9 @@ type _Error Error
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewError(error_ string) *Error {
+func NewError(openvip string, error_ string) *Error {
 	this := Error{}
+	this.Openvip = openvip
 	this.Error = error_
 	return &this
 }
@@ -45,6 +52,30 @@ func NewError(error_ string) *Error {
 func NewErrorWithDefaults() *Error {
 	this := Error{}
 	return &this
+}
+
+// GetOpenvip returns the Openvip field value
+func (o *Error) GetOpenvip() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Openvip
+}
+
+// GetOpenvipOk returns a tuple with the Openvip field value
+// and a boolean to check if the value has been set.
+func (o *Error) GetOpenvipOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Openvip, true
+}
+
+// SetOpenvip sets field value
+func (o *Error) SetOpenvip(v string) {
+	o.Openvip = v
 }
 
 // GetError returns the Error field value
@@ -103,6 +134,70 @@ func (o *Error) SetCode(v string) {
 	o.Code = &v
 }
 
+// GetId returns the Id field value if set, zero value otherwise.
+func (o *Error) GetId() string {
+	if o == nil || IsNil(o.Id) {
+		var ret string
+		return ret
+	}
+	return *o.Id
+}
+
+// GetIdOk returns a tuple with the Id field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Error) GetIdOk() (*string, bool) {
+	if o == nil || IsNil(o.Id) {
+		return nil, false
+	}
+	return o.Id, true
+}
+
+// HasId returns a boolean if a field has been set.
+func (o *Error) HasId() bool {
+	if o != nil && !IsNil(o.Id) {
+		return true
+	}
+
+	return false
+}
+
+// SetId gets a reference to the given string and assigns it to the Id field.
+func (o *Error) SetId(v string) {
+	o.Id = &v
+}
+
+// GetRef returns the Ref field value if set, zero value otherwise.
+func (o *Error) GetRef() string {
+	if o == nil || IsNil(o.Ref) {
+		var ret string
+		return ret
+	}
+	return *o.Ref
+}
+
+// GetRefOk returns a tuple with the Ref field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Error) GetRefOk() (*string, bool) {
+	if o == nil || IsNil(o.Ref) {
+		return nil, false
+	}
+	return o.Ref, true
+}
+
+// HasRef returns a boolean if a field has been set.
+func (o *Error) HasRef() bool {
+	if o != nil && !IsNil(o.Ref) {
+		return true
+	}
+
+	return false
+}
+
+// SetRef gets a reference to the given string and assigns it to the Ref field.
+func (o *Error) SetRef(v string) {
+	o.Ref = &v
+}
+
 func (o Error) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -113,9 +208,16 @@ func (o Error) MarshalJSON() ([]byte, error) {
 
 func (o Error) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	toSerialize["openvip"] = o.Openvip
 	toSerialize["error"] = o.Error
 	if !IsNil(o.Code) {
 		toSerialize["code"] = o.Code
+	}
+	if !IsNil(o.Id) {
+		toSerialize["id"] = o.Id
+	}
+	if !IsNil(o.Ref) {
+		toSerialize["ref"] = o.Ref
 	}
 	return toSerialize, nil
 }
@@ -125,6 +227,7 @@ func (o *Error) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
+		"openvip",
 		"error",
 	}
 

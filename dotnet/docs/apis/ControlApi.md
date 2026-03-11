@@ -1,6 +1,6 @@
 # OpenVip.Api.ControlApi
 
-All URIs are relative to *http://localhost:8770*
+All URIs are relative to *http://localhost:8770/openvip*
 
 | Method | HTTP request | Description |
 |--------|--------------|-------------|
@@ -8,7 +8,7 @@ All URIs are relative to *http://localhost:8770*
 
 <a id="sendcontrol"></a>
 # **SendControl**
-> Ack SendControl (ControlRequest controlRequest)
+> Response SendControl (ControlRequest controlRequest)
 
 Send control command
 
@@ -23,7 +23,7 @@ Send a control command to the engine.  Available commands: - `stt.start` — Sta
 
 ### Return type
 
-[**Ack**](Ack.md)
+[**Response**](Response.md)
 
 ### Authorization
 

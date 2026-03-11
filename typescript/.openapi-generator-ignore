@@ -26,3 +26,4 @@
 src/index.ts
 src/client.ts
 src/messages.ts
+tsconfig.json

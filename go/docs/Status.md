@@ -4,8 +4,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**ProtocolVersion** | Pointer to **string** | Supported OpenVIP protocol version | [optional] 
-**State** | Pointer to **string** | Current engine state | [optional] 
+**Openvip** | **string** | Protocol version | 
+**Stt** | Pointer to [**StatusStt**](StatusStt.md) |  | [optional] 
+**Tts** | Pointer to [**StatusTts**](StatusTts.md) |  | [optional] 
 **ConnectedAgents** | Pointer to **[]string** | List of connected agent identifiers | [optional] 
 **Platform** | Pointer to **map[string]interface{}** | Implementation-specific details (opaque to protocol) | [optional] 
 
@@ -13,7 +14,7 @@ Name | Type | Description | Notes
 
 ### NewStatus
 
-`func NewStatus() *Status`
+`func NewStatus(openvip string, ) *Status`
 
 NewStatus instantiates a new Status object
 This constructor will assign default values to properties that have it defined,
@@ -28,55 +29,75 @@ NewStatusWithDefaults instantiates a new Status object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
-### GetProtocolVersion
+### GetOpenvip
 
-`func (o *Status) GetProtocolVersion() string`
+`func (o *Status) GetOpenvip() string`
 
-GetProtocolVersion returns the ProtocolVersion field if non-nil, zero value otherwise.
+GetOpenvip returns the Openvip field if non-nil, zero value otherwise.
 
-### GetProtocolVersionOk
+### GetOpenvipOk
 
-`func (o *Status) GetProtocolVersionOk() (*string, bool)`
+`func (o *Status) GetOpenvipOk() (*string, bool)`
 
-GetProtocolVersionOk returns a tuple with the ProtocolVersion field if it's non-nil, zero value otherwise
+GetOpenvipOk returns a tuple with the Openvip field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetProtocolVersion
+### SetOpenvip
 
-`func (o *Status) SetProtocolVersion(v string)`
+`func (o *Status) SetOpenvip(v string)`
 
-SetProtocolVersion sets ProtocolVersion field to given value.
+SetOpenvip sets Openvip field to given value.
 
-### HasProtocolVersion
 
-`func (o *Status) HasProtocolVersion() bool`
+### GetStt
 
-HasProtocolVersion returns a boolean if a field has been set.
+`func (o *Status) GetStt() StatusStt`
 
-### GetState
+GetStt returns the Stt field if non-nil, zero value otherwise.
 
-`func (o *Status) GetState() string`
+### GetSttOk
 
-GetState returns the State field if non-nil, zero value otherwise.
+`func (o *Status) GetSttOk() (*StatusStt, bool)`
 
-### GetStateOk
-
-`func (o *Status) GetStateOk() (*string, bool)`
-
-GetStateOk returns a tuple with the State field if it's non-nil, zero value otherwise
+GetSttOk returns a tuple with the Stt field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetState
+### SetStt
 
-`func (o *Status) SetState(v string)`
+`func (o *Status) SetStt(v StatusStt)`
 
-SetState sets State field to given value.
+SetStt sets Stt field to given value.
 
-### HasState
+### HasStt
 
-`func (o *Status) HasState() bool`
+`func (o *Status) HasStt() bool`
 
-HasState returns a boolean if a field has been set.
+HasStt returns a boolean if a field has been set.
+
+### GetTts
+
+`func (o *Status) GetTts() StatusTts`
+
+GetTts returns the Tts field if non-nil, zero value otherwise.
+
+### GetTtsOk
+
+`func (o *Status) GetTtsOk() (*StatusTts, bool)`
+
+GetTtsOk returns a tuple with the Tts field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetTts
+
+`func (o *Status) SetTts(v StatusTts)`
+
+SetTts sets Tts field to given value.
+
+### HasTts
+
+`func (o *Status) HasTts() bool`
+
+HasTts returns a boolean if a field has been set.
 
 ### GetConnectedAgents
 

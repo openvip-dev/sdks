@@ -1,16 +1,17 @@
 {
   "compilerOptions": {
     "declaration": true,
-    "target": "es2020",
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "target": "es2018",
+    "module": "commonjs",
+    "moduleResolution": "node",
     "outDir": "dist",
     "lib": [
-      "es2020",
+      "es2018",
       "dom"
     ],
-    "strict": true,
-    "skipLibCheck": true
+    "typeRoots": [
+      "node_modules/@types"
+    ]
   },
   "exclude": [
     "dist",

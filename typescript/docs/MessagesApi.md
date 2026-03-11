@@ -1,6 +1,6 @@
 # MessagesApi
 
-All URIs are relative to *http://localhost:8770*
+All URIs are relative to *http://localhost:8770/openvip*
 
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
@@ -11,7 +11,7 @@ All URIs are relative to *http://localhost:8770*
 
 ## sendMessage
 
-> Ack sendMessage(agentId, transcription)
+> Response sendMessage(agentId, message)
 
 Send message to agent
 
@@ -33,8 +33,8 @@ async function example() {
   const body = {
     // string | Agent identifier
     agentId: agentId_example,
-    // Transcription
-    transcription: {"openvip":"1.0","type":"transcription","id":"550e8400-e29b-41d4-a716-446655440000","timestamp":"2026-02-06T10:30:00Z","text":"turn on the light","language":"en"},
+    // Message
+    message: {"openvip":"1.0","type":"transcription","id":"550e8400-e29b-41d4-a716-446655440000","timestamp":"2026-02-06T10:30:00Z","text":"turn on the light","language":"en"},
   } satisfies SendMessageRequest;
 
   try {
@@ -55,11 +55,11 @@ example().catch(console.error);
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **agentId** | `string` | Agent identifier | [Defaults to `undefined`] |
-| **transcription** | [Transcription](Transcription.md) |  | |
+| **message** | [Message](Message.md) |  | |
 
 ### Return type
 
-[**Ack**](Ack.md)
+[**Response**](Response.md)
 
 ### Authorization
 

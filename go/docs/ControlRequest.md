@@ -4,13 +4,15 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**Openvip** | **string** | Protocol version | 
+**Id** | **string** | Unique request identifier (UUID v4) | 
 **Command** | **string** | Command to execute | 
 
 ## Methods
 
 ### NewControlRequest
 
-`func NewControlRequest(command string, ) *ControlRequest`
+`func NewControlRequest(openvip string, id string, command string, ) *ControlRequest`
 
 NewControlRequest instantiates a new ControlRequest object
 This constructor will assign default values to properties that have it defined,
@@ -24,6 +26,46 @@ will change when the set of required properties is changed
 NewControlRequestWithDefaults instantiates a new ControlRequest object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetOpenvip
+
+`func (o *ControlRequest) GetOpenvip() string`
+
+GetOpenvip returns the Openvip field if non-nil, zero value otherwise.
+
+### GetOpenvipOk
+
+`func (o *ControlRequest) GetOpenvipOk() (*string, bool)`
+
+GetOpenvipOk returns a tuple with the Openvip field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetOpenvip
+
+`func (o *ControlRequest) SetOpenvip(v string)`
+
+SetOpenvip sets Openvip field to given value.
+
+
+### GetId
+
+`func (o *ControlRequest) GetId() string`
+
+GetId returns the Id field if non-nil, zero value otherwise.
+
+### GetIdOk
+
+`func (o *ControlRequest) GetIdOk() (*string, bool)`
+
+GetIdOk returns a tuple with the Id field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetId
+
+`func (o *ControlRequest) SetId(v string)`
+
+SetId sets Id field to given value.
+
 
 ### GetCommand
 

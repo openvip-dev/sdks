@@ -2,7 +2,7 @@
 /* eslint-disable */
 /**
  * OpenVIP API
- * Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d \'{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}\'  # Text-to-speech curl -X POST http://localhost:8770/speech \\   -H \"Content-Type: application/json\" \\   -d \'{\"openvip\": \"1.0\", \"type\": \"speech\", \"text\": \"hello world\", \"language\": \"en\"}\' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
+ * Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Base Path  The OpenVIP protocol defines **relative paths** only. The base path is **implementation-defined** — implementations choose where to mount these endpoints. The recommended base path is `/openvip/`.  Implementations SHOULD serve this OpenAPI spec at `{base_path}/openapi.json` for discovery (e.g. `GET /openvip/openapi.json`).  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/openvip/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/openvip/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d \'{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}\'  # Text-to-speech curl -X POST http://localhost:8770/openvip/speech \\   -H \"Content-Type: application/json\" \\   -d \'{\"openvip\": \"1.0\", \"type\": \"speech\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:05Z\", \"text\": \"hello world\", \"language\": \"en\"}\' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -20,6 +20,12 @@ import { mapValues } from '../runtime';
  */
 export interface ModelError {
     /**
+     * Protocol version
+     * @type {ModelErrorOpenvipEnum}
+     * @memberof ModelError
+     */
+    openvip: ModelErrorOpenvipEnum;
+    /**
      * Human-readable error message
      * @type {string}
      * @memberof ModelError
@@ -31,8 +37,28 @@ export interface ModelError {
      * @memberof ModelError
      */
     code?: ModelErrorCodeEnum;
+    /**
+     * Unique identifier for this error (assigned by the engine)
+     * @type {string}
+     * @memberof ModelError
+     */
+    id?: string;
+    /**
+     * ID of the request that caused this error
+     * @type {string}
+     * @memberof ModelError
+     */
+    ref?: string;
 }
 
+
+/**
+ * @export
+ */
+export const ModelErrorOpenvipEnum = {
+    _10: '1.0'
+} as const;
+export type ModelErrorOpenvipEnum = typeof ModelErrorOpenvipEnum[keyof typeof ModelErrorOpenvipEnum];
 
 /**
  * @export
@@ -51,6 +77,7 @@ export type ModelErrorCodeEnum = typeof ModelErrorCodeEnum[keyof typeof ModelErr
  * Check if a given object implements the ModelError interface.
  */
 export function instanceOfModelError(value: object): value is ModelError {
+    if (!('openvip' in value) || value['openvip'] === undefined) return false;
     if (!('error' in value) || value['error'] === undefined) return false;
     return true;
 }
@@ -65,8 +92,11 @@ export function ModelErrorFromJSONTyped(json: any, ignoreDiscriminator: boolean)
     }
     return {
         
+        'openvip': json['openvip'],
         'error': json['error'],
         'code': json['code'] == null ? undefined : json['code'],
+        'id': json['id'] == null ? undefined : json['id'],
+        'ref': json['ref'] == null ? undefined : json['ref'],
     };
 }
 
@@ -81,8 +111,11 @@ export function ModelErrorToJSONTyped(value?: ModelError | null, ignoreDiscrimin
 
     return {
         
+        'openvip': value['openvip'],
         'error': value['error'],
         'code': value['code'],
+        'id': value['id'],
+        'ref': value['ref'],
     };
 }
 

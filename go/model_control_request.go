@@ -1,7 +1,7 @@
 /*
 OpenVIP API
 
-Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}'  # Text-to-speech curl -X POST http://localhost:8770/speech \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"speech\", \"text\": \"hello world\", \"language\": \"en\"}' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
+Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Base Path  The OpenVIP protocol defines **relative paths** only. The base path is **implementation-defined** — implementations choose where to mount these endpoints. The recommended base path is `/openvip/`.  Implementations SHOULD serve this OpenAPI spec at `{base_path}/openapi.json` for discovery (e.g. `GET /openvip/openapi.json`).  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/openvip/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/openvip/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}'  # Text-to-speech curl -X POST http://localhost:8770/openvip/speech \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"speech\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:05Z\", \"text\": \"hello world\", \"language\": \"en\"}' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
 
 API version: 1.0
 */
@@ -21,6 +21,10 @@ var _ MappedNullable = &ControlRequest{}
 
 // ControlRequest Control command request
 type ControlRequest struct {
+	// Protocol version
+	Openvip string `json:"openvip"`
+	// Unique request identifier (UUID v4)
+	Id string `json:"id"`
 	// Command to execute
 	Command string `json:"command"`
 }
@@ -31,8 +35,10 @@ type _ControlRequest ControlRequest
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewControlRequest(command string) *ControlRequest {
+func NewControlRequest(openvip string, id string, command string) *ControlRequest {
 	this := ControlRequest{}
+	this.Openvip = openvip
+	this.Id = id
 	this.Command = command
 	return &this
 }
@@ -43,6 +49,54 @@ func NewControlRequest(command string) *ControlRequest {
 func NewControlRequestWithDefaults() *ControlRequest {
 	this := ControlRequest{}
 	return &this
+}
+
+// GetOpenvip returns the Openvip field value
+func (o *ControlRequest) GetOpenvip() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Openvip
+}
+
+// GetOpenvipOk returns a tuple with the Openvip field value
+// and a boolean to check if the value has been set.
+func (o *ControlRequest) GetOpenvipOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Openvip, true
+}
+
+// SetOpenvip sets field value
+func (o *ControlRequest) SetOpenvip(v string) {
+	o.Openvip = v
+}
+
+// GetId returns the Id field value
+func (o *ControlRequest) GetId() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Id
+}
+
+// GetIdOk returns a tuple with the Id field value
+// and a boolean to check if the value has been set.
+func (o *ControlRequest) GetIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Id, true
+}
+
+// SetId sets field value
+func (o *ControlRequest) SetId(v string) {
+	o.Id = v
 }
 
 // GetCommand returns the Command field value
@@ -79,6 +133,8 @@ func (o ControlRequest) MarshalJSON() ([]byte, error) {
 
 func (o ControlRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	toSerialize["openvip"] = o.Openvip
+	toSerialize["id"] = o.Id
 	toSerialize["command"] = o.Command
 	return toSerialize, nil
 }
@@ -88,6 +144,8 @@ func (o *ControlRequest) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
+		"openvip",
+		"id",
 		"command",
 	}
 

@@ -1,6 +1,6 @@
 # \MessagesAPI
 
-All URIs are relative to *http://localhost:8770*
+All URIs are relative to *http://localhost:8770/openvip*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -11,7 +11,7 @@ Method | HTTP request | Description
 
 ## SendMessage
 
-> Ack SendMessage(ctx, agentId).Transcription(transcription).Execute()
+> Response SendMessage(ctx, agentId).Message(message).Execute()
 
 Send message to agent
 
@@ -27,21 +27,21 @@ import (
 	"fmt"
 	"os"
     "time"
-	openapiclient "github.com/openvip-dev/sdks"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
 )
 
 func main() {
 	agentId := "agentId_example" // string | Agent identifier
-	transcription := *openapiclient.NewTranscription("1.0", "Type_example", "Id_example", time.Now(), "turn on the light") // Transcription | 
+	message := *openapiclient.NewMessage("Openvip_example", "Type_example", "Id_example", time.Now(), "Text_example") // Message | 
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.MessagesAPI.SendMessage(context.Background(), agentId).Transcription(transcription).Execute()
+	resp, r, err := apiClient.MessagesAPI.SendMessage(context.Background(), agentId).Message(message).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `MessagesAPI.SendMessage``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `SendMessage`: Ack
+	// response from `SendMessage`: Response
 	fmt.Fprintf(os.Stdout, "Response from `MessagesAPI.SendMessage`: %v\n", resp)
 }
 ```
@@ -62,11 +62,11 @@ Other parameters are passed through a pointer to a apiSendMessageRequest struct 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
- **transcription** | [**Transcription**](Transcription.md) |  | 
+ **message** | [**Message**](Message.md) |  | 
 
 ### Return type
 
-[**Ack**](Ack.md)
+[**Response**](Response.md)
 
 ### Authorization
 
@@ -99,7 +99,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/openvip-dev/sdks"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
 )
 
 func main() {

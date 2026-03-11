@@ -26,7 +26,7 @@ async function example() {
 
   const body = {
     // ControlRequest
-    controlRequest: {"command":"stt.stop"},
+    controlRequest: {"openvip":"1.0","id":"770e8400-e29b-41d4-a716-446655440000","command":"stt.stop"},
   } satisfies SendControlRequest;
 
   try {
@@ -46,13 +46,14 @@ example().catch(console.error);
 
 ### API Endpoints
 
-All URIs are relative to *http://localhost:8770*
+All URIs are relative to *http://localhost:8770/openvip*
 
 | Class | Method | HTTP request | Description
 | ----- | ------ | ------------ | -------------
 *ControlApi* | [**sendControl**](docs/ControlApi.md#sendcontrol) | **POST** /control | Send control command
 *MessagesApi* | [**sendMessage**](docs/MessagesApi.md#sendmessage) | **POST** /agents/{agent_id}/messages | Send message to agent
 *MessagesApi* | [**subscribeAgent**](docs/MessagesApi.md#subscribeagent) | **GET** /agents/{agent_id}/messages | Subscribe to agent messages (SSE)
+*SpeechApi* | [**stopSpeech**](docs/SpeechApi.md#stopspeech) | **POST** /speech/stop | Stop TTS playback
 *SpeechApi* | [**textToSpeech**](docs/SpeechApi.md#texttospeech) | **POST** /speech | Text-to-speech request
 *StatusApi* | [**getStatus**](docs/StatusApi.md#getstatus) | **GET** /status | Get engine status
 *StatusApi* | [**subscribeStatus**](docs/StatusApi.md#subscribestatus) | **GET** /status/stream | Subscribe to status changes (SSE)
@@ -60,12 +61,17 @@ All URIs are relative to *http://localhost:8770*
 
 ### Models
 
-- [Ack](docs/Ack.md)
 - [ControlRequest](docs/ControlRequest.md)
+- [Message](docs/Message.md)
+- [MessageXAgentSwitch](docs/MessageXAgentSwitch.md)
+- [MessageXInput](docs/MessageXInput.md)
 - [ModelError](docs/ModelError.md)
+- [Response](docs/Response.md)
 - [SpeechRequest](docs/SpeechRequest.md)
 - [SpeechResponse](docs/SpeechResponse.md)
 - [Status](docs/Status.md)
+- [StatusStt](docs/StatusStt.md)
+- [StatusTts](docs/StatusTts.md)
 - [Transcription](docs/Transcription.md)
 
 ### Authorization

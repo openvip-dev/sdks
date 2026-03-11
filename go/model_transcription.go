@@ -1,7 +1,7 @@
 /*
 OpenVIP API
 
-Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}'  # Text-to-speech curl -X POST http://localhost:8770/speech \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"speech\", \"text\": \"hello world\", \"language\": \"en\"}' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
+Open Voice Interaction Protocol (OpenVIP) HTTP API specification.  This API allows applications to send and receive voice interaction messages.  ## Base Path  The OpenVIP protocol defines **relative paths** only. The base path is **implementation-defined** — implementations choose where to mount these endpoints. The recommended base path is `/openvip/`.  Implementations SHOULD serve this OpenAPI spec at `{base_path}/openapi.json` for discovery (e.g. `GET /openvip/openapi.json`).  ## Quick Start  ```bash # Subscribe to messages (SSE) — this IS the registration curl http://localhost:8770/openvip/agents/my-agent-id/messages  # Send a message to an agent curl -X POST http://localhost:8770/openvip/agents/my-agent-id/messages \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"transcription\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:00Z\", \"text\": \"hello\"}'  # Text-to-speech curl -X POST http://localhost:8770/openvip/speech \\   -H \"Content-Type: application/json\" \\   -d '{\"openvip\": \"1.0\", \"type\": \"speech\", \"id\": \"uuid\", \"timestamp\": \"2026-02-06T10:30:05Z\", \"text\": \"hello world\", \"language\": \"en\"}' ```  ## Agent Lifecycle  Agents are **ephemeral**. An agent exists only while its SSE connection is open. No explicit registration is needed — connecting to the SSE endpoint registers the agent. Disconnecting automatically de-registers it. 
 
 API version: 1.0
 */
@@ -13,6 +13,7 @@ package openvip
 import (
 	"encoding/json"
 	"time"
+	"bytes"
 	"fmt"
 )
 
@@ -23,27 +24,27 @@ var _ MappedNullable = &Transcription{}
 type Transcription struct {
 	// Protocol version
 	Openvip string `json:"openvip"`
-	// Message type
 	Type string `json:"type"`
 	// Unique message identifier
 	Id string `json:"id"`
 	// ISO 8601 timestamp
 	Timestamp time.Time `json:"timestamp"`
-	// Transcribed text
+	// Message text content
 	Text string `json:"text"`
 	// Producer identifier
 	Origin *string `json:"origin,omitempty"`
 	// BCP 47 language tag
 	Language *string `json:"language,omitempty" validate:"regexp=^[a-z]{2}(-[A-Z]{2})?$"`
-	// Transcription confidence score
-	Confidence *float32 `json:"confidence,omitempty"`
-	// If true, this is an incomplete transcription in progress
-	Partial *bool `json:"partial,omitempty"`
 	// ID of the original message (OpenTelemetry-style)
 	TraceId *string `json:"trace_id,omitempty"`
 	// ID of the parent message (OpenTelemetry-style)
 	ParentId *string `json:"parent_id,omitempty"`
-	AdditionalProperties map[string]interface{}
+	XInput *MessageXInput `json:"x_input,omitempty"`
+	XAgentSwitch *MessageXAgentSwitch `json:"x_agent_switch,omitempty"`
+	// Transcription confidence score
+	Confidence *float32 `json:"confidence,omitempty"`
+	// If true, this is an incomplete transcription in progress
+	Partial *bool `json:"partial,omitempty"`
 }
 
 type _Transcription Transcription
@@ -254,70 +255,6 @@ func (o *Transcription) SetLanguage(v string) {
 	o.Language = &v
 }
 
-// GetConfidence returns the Confidence field value if set, zero value otherwise.
-func (o *Transcription) GetConfidence() float32 {
-	if o == nil || IsNil(o.Confidence) {
-		var ret float32
-		return ret
-	}
-	return *o.Confidence
-}
-
-// GetConfidenceOk returns a tuple with the Confidence field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *Transcription) GetConfidenceOk() (*float32, bool) {
-	if o == nil || IsNil(o.Confidence) {
-		return nil, false
-	}
-	return o.Confidence, true
-}
-
-// HasConfidence returns a boolean if a field has been set.
-func (o *Transcription) HasConfidence() bool {
-	if o != nil && !IsNil(o.Confidence) {
-		return true
-	}
-
-	return false
-}
-
-// SetConfidence gets a reference to the given float32 and assigns it to the Confidence field.
-func (o *Transcription) SetConfidence(v float32) {
-	o.Confidence = &v
-}
-
-// GetPartial returns the Partial field value if set, zero value otherwise.
-func (o *Transcription) GetPartial() bool {
-	if o == nil || IsNil(o.Partial) {
-		var ret bool
-		return ret
-	}
-	return *o.Partial
-}
-
-// GetPartialOk returns a tuple with the Partial field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *Transcription) GetPartialOk() (*bool, bool) {
-	if o == nil || IsNil(o.Partial) {
-		return nil, false
-	}
-	return o.Partial, true
-}
-
-// HasPartial returns a boolean if a field has been set.
-func (o *Transcription) HasPartial() bool {
-	if o != nil && !IsNil(o.Partial) {
-		return true
-	}
-
-	return false
-}
-
-// SetPartial gets a reference to the given bool and assigns it to the Partial field.
-func (o *Transcription) SetPartial(v bool) {
-	o.Partial = &v
-}
-
 // GetTraceId returns the TraceId field value if set, zero value otherwise.
 func (o *Transcription) GetTraceId() string {
 	if o == nil || IsNil(o.TraceId) {
@@ -382,6 +319,134 @@ func (o *Transcription) SetParentId(v string) {
 	o.ParentId = &v
 }
 
+// GetXInput returns the XInput field value if set, zero value otherwise.
+func (o *Transcription) GetXInput() MessageXInput {
+	if o == nil || IsNil(o.XInput) {
+		var ret MessageXInput
+		return ret
+	}
+	return *o.XInput
+}
+
+// GetXInputOk returns a tuple with the XInput field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Transcription) GetXInputOk() (*MessageXInput, bool) {
+	if o == nil || IsNil(o.XInput) {
+		return nil, false
+	}
+	return o.XInput, true
+}
+
+// HasXInput returns a boolean if a field has been set.
+func (o *Transcription) HasXInput() bool {
+	if o != nil && !IsNil(o.XInput) {
+		return true
+	}
+
+	return false
+}
+
+// SetXInput gets a reference to the given MessageXInput and assigns it to the XInput field.
+func (o *Transcription) SetXInput(v MessageXInput) {
+	o.XInput = &v
+}
+
+// GetXAgentSwitch returns the XAgentSwitch field value if set, zero value otherwise.
+func (o *Transcription) GetXAgentSwitch() MessageXAgentSwitch {
+	if o == nil || IsNil(o.XAgentSwitch) {
+		var ret MessageXAgentSwitch
+		return ret
+	}
+	return *o.XAgentSwitch
+}
+
+// GetXAgentSwitchOk returns a tuple with the XAgentSwitch field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Transcription) GetXAgentSwitchOk() (*MessageXAgentSwitch, bool) {
+	if o == nil || IsNil(o.XAgentSwitch) {
+		return nil, false
+	}
+	return o.XAgentSwitch, true
+}
+
+// HasXAgentSwitch returns a boolean if a field has been set.
+func (o *Transcription) HasXAgentSwitch() bool {
+	if o != nil && !IsNil(o.XAgentSwitch) {
+		return true
+	}
+
+	return false
+}
+
+// SetXAgentSwitch gets a reference to the given MessageXAgentSwitch and assigns it to the XAgentSwitch field.
+func (o *Transcription) SetXAgentSwitch(v MessageXAgentSwitch) {
+	o.XAgentSwitch = &v
+}
+
+// GetConfidence returns the Confidence field value if set, zero value otherwise.
+func (o *Transcription) GetConfidence() float32 {
+	if o == nil || IsNil(o.Confidence) {
+		var ret float32
+		return ret
+	}
+	return *o.Confidence
+}
+
+// GetConfidenceOk returns a tuple with the Confidence field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Transcription) GetConfidenceOk() (*float32, bool) {
+	if o == nil || IsNil(o.Confidence) {
+		return nil, false
+	}
+	return o.Confidence, true
+}
+
+// HasConfidence returns a boolean if a field has been set.
+func (o *Transcription) HasConfidence() bool {
+	if o != nil && !IsNil(o.Confidence) {
+		return true
+	}
+
+	return false
+}
+
+// SetConfidence gets a reference to the given float32 and assigns it to the Confidence field.
+func (o *Transcription) SetConfidence(v float32) {
+	o.Confidence = &v
+}
+
+// GetPartial returns the Partial field value if set, zero value otherwise.
+func (o *Transcription) GetPartial() bool {
+	if o == nil || IsNil(o.Partial) {
+		var ret bool
+		return ret
+	}
+	return *o.Partial
+}
+
+// GetPartialOk returns a tuple with the Partial field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Transcription) GetPartialOk() (*bool, bool) {
+	if o == nil || IsNil(o.Partial) {
+		return nil, false
+	}
+	return o.Partial, true
+}
+
+// HasPartial returns a boolean if a field has been set.
+func (o *Transcription) HasPartial() bool {
+	if o != nil && !IsNil(o.Partial) {
+		return true
+	}
+
+	return false
+}
+
+// SetPartial gets a reference to the given bool and assigns it to the Partial field.
+func (o *Transcription) SetPartial(v bool) {
+	o.Partial = &v
+}
+
 func (o Transcription) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -403,23 +468,24 @@ func (o Transcription) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Language) {
 		toSerialize["language"] = o.Language
 	}
-	if !IsNil(o.Confidence) {
-		toSerialize["confidence"] = o.Confidence
-	}
-	if !IsNil(o.Partial) {
-		toSerialize["partial"] = o.Partial
-	}
 	if !IsNil(o.TraceId) {
 		toSerialize["trace_id"] = o.TraceId
 	}
 	if !IsNil(o.ParentId) {
 		toSerialize["parent_id"] = o.ParentId
 	}
-
-	for key, value := range o.AdditionalProperties {
-		toSerialize[key] = value
+	if !IsNil(o.XInput) {
+		toSerialize["x_input"] = o.XInput
 	}
-
+	if !IsNil(o.XAgentSwitch) {
+		toSerialize["x_agent_switch"] = o.XAgentSwitch
+	}
+	if !IsNil(o.Confidence) {
+		toSerialize["confidence"] = o.Confidence
+	}
+	if !IsNil(o.Partial) {
+		toSerialize["partial"] = o.Partial
+	}
 	return toSerialize, nil
 }
 
@@ -451,30 +517,15 @@ func (o *Transcription) UnmarshalJSON(data []byte) (err error) {
 
 	varTranscription := _Transcription{}
 
-	err = json.Unmarshal(data, &varTranscription)
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&varTranscription)
 
 	if err != nil {
 		return err
 	}
 
 	*o = Transcription(varTranscription)
-
-	additionalProperties := make(map[string]interface{})
-
-	if err = json.Unmarshal(data, &additionalProperties); err == nil {
-		delete(additionalProperties, "openvip")
-		delete(additionalProperties, "type")
-		delete(additionalProperties, "id")
-		delete(additionalProperties, "timestamp")
-		delete(additionalProperties, "text")
-		delete(additionalProperties, "origin")
-		delete(additionalProperties, "language")
-		delete(additionalProperties, "confidence")
-		delete(additionalProperties, "partial")
-		delete(additionalProperties, "trace_id")
-		delete(additionalProperties, "parent_id")
-		o.AdditionalProperties = additionalProperties
-	}
 
 	return err
 }

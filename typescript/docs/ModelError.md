@@ -7,8 +7,11 @@ Error response
 
 Name | Type
 ------------ | -------------
+`openvip` | string
 `error` | string
 `code` | string
+`id` | string
+`ref` | string
 
 ## Example
 
@@ -17,8 +20,11 @@ import type { ModelError } from 'openvip'
 
 // TODO: Update the object below with actual values
 const example = {
+  "openvip": null,
   "error": null,
   "code": null,
+  "id": null,
+  "ref": null,
 } satisfies ModelError
 
 console.log(example)

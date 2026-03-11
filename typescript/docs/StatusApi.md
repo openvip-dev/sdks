@@ -1,6 +1,6 @@
 # StatusApi
 
-All URIs are relative to *http://localhost:8770*
+All URIs are relative to *http://localhost:8770/openvip*
 
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
@@ -74,7 +74,7 @@ No authorization required
 
 Subscribe to status changes (SSE)
 
-Server-Sent Events stream that pushes status updates on state transitions.  Events are sent when &#x60;state&#x60;, &#x60;connected_agents&#x60;, or other discrete fields change. Continuously changing fields (e.g., &#x60;uptime_seconds&#x60;) do not trigger events.  The payload of each event is a &#x60;Status&#x60; object — the same schema as the &#x60;GET /status&#x60; response.  Keepalive comments (&#x60;: keepalive&#x60;) are sent every 30 seconds if no events occur.  Clients that cannot use SSE should fall back to polling &#x60;GET /status&#x60;. 
+Server-Sent Events stream that pushes status updates on state transitions.  Events are sent when &#x60;stt&#x60;, &#x60;tts&#x60;, &#x60;connected_agents&#x60;, or other discrete fields change. Continuously changing fields (e.g., &#x60;uptime_seconds&#x60;) do not trigger events.  The payload of each event is a &#x60;Status&#x60; object — the same schema as the &#x60;GET /status&#x60; response.  Keepalive comments (&#x60;: keepalive&#x60;) are sent every 30 seconds if no events occur.  Clients that cannot use SSE should fall back to polling &#x60;GET /status&#x60;. 
 
 ### Example
 
