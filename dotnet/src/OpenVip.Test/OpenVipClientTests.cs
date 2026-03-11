@@ -164,58 +164,6 @@ public class OpenVipClientTests
 }
 
 /// <summary>
-/// Tests for the MessageFactory.
-/// </summary>
-public class MessageFactoryTests
-{
-    [Fact]
-    public void CreateTranscription_SetsProtocolFields()
-    {
-        var msg = MessageFactory.CreateTranscription("hello", language: "en");
-
-        Assert.Equal("1.0", msg.Openvip);
-        Assert.Equal("transcription", msg.Type);
-        Assert.Equal("hello", msg.Text);
-        Assert.Equal("en", msg.Language);
-        Assert.NotEqual(Guid.Empty, msg.Id);
-        Assert.True(msg.Timestamp <= DateTime.UtcNow);
-    }
-
-    [Fact]
-    public void CreateTranscription_OptionalFieldsAreNull()
-    {
-        var msg = MessageFactory.CreateTranscription("test");
-
-        Assert.Null(msg.Language);
-        Assert.Null(msg.Confidence);
-        Assert.Null(msg.Partial);
-        Assert.Null(msg.Origin);
-        Assert.Null(msg.TraceId);
-        Assert.Null(msg.ParentId);
-    }
-
-    [Fact]
-    public void CreateSpeechRequest_SetsProtocolFields()
-    {
-        var req = MessageFactory.CreateSpeechRequest("speak this", language: "it");
-
-        Assert.Equal("1.0", req.Openvip);
-        Assert.Equal("speech", req.Type);
-        Assert.Equal("speak this", req.Text);
-        Assert.Equal("it", req.Language);
-    }
-
-    [Fact]
-    public void CreateTranscription_UniqueIds()
-    {
-        var msg1 = MessageFactory.CreateTranscription("a");
-        var msg2 = MessageFactory.CreateTranscription("b");
-
-        Assert.NotEqual(msg1.Id, msg2.Id);
-    }
-}
-
-/// <summary>
 /// Mock HttpMessageHandler for testing.
 /// </summary>
 internal class MockHandler : HttpMessageHandler

@@ -63,6 +63,7 @@ def create_speech_request(
     *,
     language: str | None = None,
     voice: str | None = None,
+    **extensions: Any,
 ) -> SpeechRequest:
     """Create a SpeechRequest with auto-filled protocol fields.
 
@@ -70,11 +71,12 @@ def create_speech_request(
         text: Text to synthesize.
         language: BCP 47 language tag (e.g. "en", "it").
         voice: Voice identifier, engine-specific (e.g. "af_sky" for Kokoro).
+        **extensions: Additional extension fields.
 
     Returns:
         SpeechRequest with protocol version auto-filled.
     """
-    return SpeechRequest(
+    msg = SpeechRequest(
         openvip=PROTOCOL_VERSION,
         type="speech",
         id=uuid4(),
@@ -82,7 +84,9 @@ def create_speech_request(
         text=text,
         language=language,
         voice=voice,
+        **extensions,
     )
+    return msg
 
 
 def create_control_request(command: str) -> ControlRequest:

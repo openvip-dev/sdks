@@ -10,3 +10,4 @@ export * from './models/index';
 export { Client, DuplicateAgentError } from './client';
 export type { SubscribeOptions } from './client';
 export { createTranscription, createSpeechRequest, createControlRequest, PROTOCOL_VERSION } from './messages';
+export { Response as ResponseMessage } from './models/index';

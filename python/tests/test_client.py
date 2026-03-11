@@ -113,13 +113,15 @@ class TestClientControl:
         mock_urlopen.return_value = _mock_response({"openvip": "1.0", "status": "ok"})
         client = Client("http://test:8770")
 
-        result = client.control("stt.toggle")
+        result = client.control("stt.start")
 
         assert isinstance(result, Response)
         assert result.status == "ok"
 
         body = json.loads(mock_urlopen.call_args[0][0].data)
-        assert body == {"command": "stt.toggle"}
+        assert body["command"] == "stt.start"
+        assert body["openvip"] == "1.0"
+        assert "id" in body
         assert mock_urlopen.call_args[0][0].full_url == "http://test:8770/control"
 
     @patch("openvip.client.urllib.request.urlopen")
@@ -130,7 +132,9 @@ class TestClientControl:
         client.start_listening()
 
         body = json.loads(mock_urlopen.call_args[0][0].data)
-        assert body == {"command": "stt.start"}
+        assert body["command"] == "stt.start"
+        assert body["openvip"] == "1.0"
+        assert "id" in body
 
     @patch("openvip.client.urllib.request.urlopen")
     def test_stop_listening(self, mock_urlopen):
@@ -140,7 +144,9 @@ class TestClientControl:
         client.stop_listening()
 
         body = json.loads(mock_urlopen.call_args[0][0].data)
-        assert body == {"command": "stt.stop"}
+        assert body["command"] == "stt.stop"
+        assert body["openvip"] == "1.0"
+        assert "id" in body
 
     @patch("openvip.client.urllib.request.urlopen")
     def test_shutdown(self, mock_urlopen):
@@ -150,7 +156,9 @@ class TestClientControl:
         client.shutdown()
 
         body = json.loads(mock_urlopen.call_args[0][0].data)
-        assert body == {"command": "engine.shutdown"}
+        assert body["command"] == "engine.shutdown"
+        assert body["openvip"] == "1.0"
+        assert "id" in body
 
 
 class TestClientSendMessage:

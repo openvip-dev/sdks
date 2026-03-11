@@ -72,10 +72,8 @@ class Client:
         Returns:
             SpeechResponse with status and duration_ms.
         """
-        req = create_speech_request(text, language=language)
+        req = create_speech_request(text, language=language, **kwargs)
         body = req.to_dict()
-        if kwargs:
-            body.update(kwargs)
         data = self._post("/speech", body)
         return SpeechResponse.from_dict(data)
 
@@ -123,7 +121,7 @@ class Client:
         Returns:
             Response.
         """
-        data = self._post("/speech/stop", {})
+        data = self._post("/speech/stop")
         return Response.from_dict(data)
 
     def start_listening(self) -> Response:
@@ -368,9 +366,14 @@ class Client:
         with urllib.request.urlopen(req, timeout=self.timeout) as resp:
             return json.loads(resp.read())
 
-    def _post(self, path: str, body: dict[str, Any]) -> dict[str, Any]:
+    def _post(
+        self, path: str, body: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """POST request."""
-        payload = json.dumps(body, default=str).encode()
+        if body is not None:
+            payload = json.dumps(body, default=str).encode()
+        else:
+            payload = b""
         headers = {"Content-Type": "application/json"}
         if self._token:
             headers["Authorization"] = f"Bearer {self._token}"

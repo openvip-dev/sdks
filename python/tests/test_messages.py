@@ -3,7 +3,12 @@
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
-from openvip.messages import PROTOCOL_VERSION, create_speech_request, create_transcription
+from openvip.messages import (
+    PROTOCOL_VERSION,
+    create_control_request,
+    create_speech_request,
+    create_transcription,
+)
 
 
 class TestCreateTranscription:
@@ -105,3 +110,26 @@ class TestCreateSpeechRequest:
         assert d["voice"] == "af_sky"
         assert "id" in d
         assert "timestamp" in d
+
+
+class TestCreateControlRequest:
+    def test_basic(self):
+        req = create_control_request("stt.start")
+        assert req.command == "stt.start"
+        assert req.openvip == PROTOCOL_VERSION
+
+    def test_auto_id(self):
+        req = create_control_request("stt.stop")
+        assert isinstance(req.id, UUID)
+
+    def test_unique_ids(self):
+        a = create_control_request("stt.start")
+        b = create_control_request("stt.stop")
+        assert a.id != b.id
+
+    def test_to_dict(self):
+        req = create_control_request("engine.shutdown")
+        d = req.to_dict()
+        assert d["command"] == "engine.shutdown"
+        assert d["openvip"] == PROTOCOL_VERSION
+        assert "id" in d
