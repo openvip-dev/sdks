@@ -23,8 +23,11 @@ def watch_focus():
 threading.Thread(target=watch_focus, daemon=True).start()
 
 # Listen for transcriptions and echo them back via TTS
-for message in client.subscribe(name, reconnect=True):
-    print(f"[user ] {message.text}")
+try:
+    for message in client.subscribe(name, reconnect=True):
+        print(f"[user ] {message.text}")
 
-    if message.text.strip():
-        client.speak(f"You said: {message.text}", language="en")
+        if message.text.strip():
+            client.speak(f"You said: {message.text}", language="en")
+except KeyboardInterrupt:
+    print("\nStopped.")
