@@ -6,6 +6,12 @@ using OpenVip;
 var name = args.Length > 0 ? args[0] : "demo";
 var client = new OpenVipClient();
 
+if (!await client.IsAvailableAsync())
+{
+    Console.WriteLine("Engine not available");
+    return 1;
+}
+
 var cts = new CancellationTokenSource();
 Console.CancelKeyPress += (_, e) => { e.Cancel = true; cts.Cancel(); };
 
