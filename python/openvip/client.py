@@ -9,7 +9,7 @@ import urllib.error
 import urllib.request
 from typing import Any, Callable, Iterator
 
-from openvip.messages import PROTOCOL_VERSION, create_speech_request
+from openvip.messages import PROTOCOL_VERSION, create_control_request, create_speech_request
 from openvip.models.response import Response
 from openvip.models.speech_request import SpeechRequest
 from openvip.models.speech_response import SpeechResponse
@@ -113,7 +113,8 @@ class Client:
         Returns:
             Response.
         """
-        data = self._post("/control", {"command": command})
+        req = create_control_request(command)
+        data = self._post("/control", req.to_dict())
         return Response.from_dict(data)
 
     def stop_speech(self) -> Response:

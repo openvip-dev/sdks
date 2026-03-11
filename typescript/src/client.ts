@@ -21,7 +21,7 @@ import { StatusApi } from "./apis/StatusApi";
 import { SpeechApi } from "./apis/SpeechApi";
 import { ControlApi } from "./apis/ControlApi";
 import { MessagesApi } from "./apis/MessagesApi";
-import { createSpeechRequest } from "./messages";
+import { createSpeechRequest, createControlRequest } from "./messages";
 import type {
   Status,
   SpeechResponse,
@@ -30,8 +30,6 @@ import type {
   SpeechRequest,
 } from "./models";
 import {
-  ControlRequestOpenvipEnum,
-  ControlRequestCommandEnum,
   TranscriptionFromJSON,
   SpeechRequestFromJSON,
   StatusFromJSON,
@@ -110,11 +108,7 @@ export class Client {
   /** Send a control command. */
   async control(command: string): Promise<ResponseMessage> {
     return this.controlApi.sendControl({
-      controlRequest: {
-        openvip: ControlRequestOpenvipEnum._10,
-        id: crypto.randomUUID(),
-        command: command as ControlRequestCommandEnum,
-      },
+      controlRequest: createControlRequest(command),
     });
   }
 

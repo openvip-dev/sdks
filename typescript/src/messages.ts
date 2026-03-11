@@ -10,8 +10,13 @@
  * ```
  */
 
-import type { Transcription, SpeechRequest } from "./models";
-import { TranscriptionTypeEnum, SpeechRequestTypeEnum } from "./models";
+import type { Transcription, SpeechRequest, ControlRequest } from "./models";
+import {
+  TranscriptionTypeEnum,
+  SpeechRequestTypeEnum,
+  ControlRequestOpenvipEnum,
+  ControlRequestCommandEnum,
+} from "./models";
 
 export const PROTOCOL_VERSION = "1.0";
 
@@ -57,5 +62,20 @@ export function createSpeechRequest(
     timestamp: new Date(),
     text,
     language,
+  };
+}
+
+/**
+ * Create a ControlRequest with auto-filled protocol fields.
+ *
+ * Automatically generates `id` (UUID).
+ */
+export function createControlRequest(
+  command: string,
+): ControlRequest {
+  return {
+    openvip: ControlRequestOpenvipEnum._10,
+    id: crypto.randomUUID(),
+    command: command as ControlRequestCommandEnum,
   };
 }

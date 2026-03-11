@@ -136,8 +136,8 @@ public class OpenVipClient : IDisposable
     /// <summary>Send a control command.</summary>
     public async Task<AckDto> ControlAsync(string command, CancellationToken ct = default)
     {
-        var body = new { command };
-        var resp = await _http.PostAsJsonAsync("control", body, JsonOptions, ct);
+        var req = MessageFactory.CreateControlRequest(command);
+        var resp = await _http.PostAsJsonAsync("control", req, JsonOptions, ct);
         resp.EnsureSuccessStatusCode();
         return await resp.Content.ReadFromJsonAsync<AckDto>(JsonOptions, ct)
             ?? throw new InvalidOperationException("Empty response");
@@ -332,6 +332,8 @@ public record StatusDto(
     Dictionary<string, JsonElement>? Platform);
 
 public record AckDto(string Status, string? Id);
+
+public record ControlRequestDto(string Openvip, Guid Id, string Command);
 
 public record TranscriptionDto(
     string Openvip,

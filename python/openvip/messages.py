@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from typing import Any
 from uuid import uuid4
 
+from openvip.models.control_request import ControlRequest
 from openvip.models.speech_request import SpeechRequest
 from openvip.models.transcription import Transcription
 
@@ -81,4 +82,20 @@ def create_speech_request(
         text=text,
         language=language,
         voice=voice,
+    )
+
+
+def create_control_request(command: str) -> ControlRequest:
+    """Create a ControlRequest with auto-filled protocol fields.
+
+    Args:
+        command: Command string (e.g. "stt.start", "stt.stop", "engine.shutdown").
+
+    Returns:
+        ControlRequest with protocol version and id auto-filled.
+    """
+    return ControlRequest(
+        openvip=PROTOCOL_VERSION,
+        id=uuid4(),
+        command=command,
     )

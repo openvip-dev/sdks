@@ -41,6 +41,17 @@ public static class MessageFactory
     }
 
     /// <summary>
+    /// Create a ControlRequest with auto-filled id.
+    /// </summary>
+    public static ControlRequestDto CreateControlRequest(string command)
+    {
+        return new ControlRequestDto(
+            Openvip: ProtocolVersion,
+            Id: Guid.NewGuid(),
+            Command: command);
+    }
+
+    /// <summary>
     /// Create a SpeechRequest with auto-filled id and timestamp.
     /// </summary>
     public static SpeechRequestDto CreateSpeechRequest(
