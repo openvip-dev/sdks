@@ -9,6 +9,18 @@ node_modules/
 dist/
 build/
 *.egg-info/
+bin/
+obj/
+*.dll
+*.pdb
+*.exe
+
+# Go binaries
+examples/go/openvip-demo
+
+# Demo full versions (superseded by simple demos)
+examples/python/demo-full.py
+examples/typescript/demo-full.ts
 
 # Future SDKs (uncomment when generated)
 rust/

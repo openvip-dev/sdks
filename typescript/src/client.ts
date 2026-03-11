@@ -25,7 +25,7 @@ import { createSpeechRequest } from "./messages";
 import type {
   Status,
   SpeechResponse,
-  Response as AckResponse,
+  Response as ResponseMessage,
   Transcription,
   SpeechRequest,
 } from "./models";
@@ -108,7 +108,7 @@ export class Client {
   // --- Control ---
 
   /** Send a control command. */
-  async control(command: string): Promise<AckResponse> {
+  async control(command: string): Promise<ResponseMessage> {
     return this.controlApi.sendControl({
       controlRequest: {
         openvip: ControlRequestOpenvipEnum._10,
@@ -119,24 +119,24 @@ export class Client {
   }
 
   /** Start speech-to-text. */
-  async startListening(): Promise<AckResponse> {
+  async startListening(): Promise<ResponseMessage> {
     return this.control("stt.start");
   }
 
   /** Stop speech-to-text. */
-  async stopListening(): Promise<AckResponse> {
+  async stopListening(): Promise<ResponseMessage> {
     return this.control("stt.stop");
   }
 
   /** Request engine shutdown. */
-  async shutdown(): Promise<AckResponse> {
+  async shutdown(): Promise<ResponseMessage> {
     return this.control("engine.shutdown");
   }
 
   // --- Messages ---
 
   /** Send a message to a connected agent. */
-  async sendMessage(agentId: string, message: Transcription): Promise<AckResponse> {
+  async sendMessage(agentId: string, message: Transcription): Promise<ResponseMessage> {
     return this.messagesApi.sendMessage({
       agentId,
       message,
