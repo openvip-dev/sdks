@@ -55,7 +55,6 @@ public class OpenVipClient : IDisposable
 
     private readonly HttpClient _http;
     private readonly bool _ownsHttpClient;
-    private readonly string? _token;
 
     /// <summary>
     /// Create a new OpenVIP client.
@@ -64,9 +63,8 @@ public class OpenVipClient : IDisposable
     /// <param name="token">Optional Bearer token for authentication.</param>
     public OpenVipClient(string url = "http://localhost:8770/openvip", string? token = null)
     {
-        _http = new HttpClient { BaseAddress = new Uri(url.TrimEnd('/')) };
+        _http = new HttpClient { BaseAddress = new Uri(url.TrimEnd('/') + "/") };
         _ownsHttpClient = true;
-        _token = token;
         if (token != null)
             _http.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
@@ -86,7 +84,7 @@ public class OpenVipClient : IDisposable
     /// <summary>Get engine status.</summary>
     public async Task<StatusDto> GetStatusAsync(CancellationToken ct = default)
     {
-        var resp = await _http.GetFromJsonAsync<StatusDto>("/status", JsonOptions, ct)
+        var resp = await _http.GetFromJsonAsync<StatusDto>("status", JsonOptions, ct)
             ?? throw new InvalidOperationException("Empty response");
         return resp;
     }
@@ -118,7 +116,7 @@ public class OpenVipClient : IDisposable
         CancellationToken ct = default)
     {
         var req = MessageFactory.CreateSpeechRequest(text, language);
-        var resp = await _http.PostAsJsonAsync("/speech", req, JsonOptions, ct);
+        var resp = await _http.PostAsJsonAsync("speech", req, JsonOptions, ct);
         resp.EnsureSuccessStatusCode();
         return await resp.Content.ReadFromJsonAsync<SpeechResponseDto>(JsonOptions, ct)
             ?? throw new InvalidOperationException("Empty response");
@@ -127,7 +125,7 @@ public class OpenVipClient : IDisposable
     /// <summary>Stop the currently playing TTS audio.</summary>
     public async Task<AckDto> StopSpeechAsync(CancellationToken ct = default)
     {
-        var resp = await _http.PostAsJsonAsync("/speech/stop", new { }, JsonOptions, ct);
+        var resp = await _http.PostAsJsonAsync("speech/stop", new { }, JsonOptions, ct);
         resp.EnsureSuccessStatusCode();
         return await resp.Content.ReadFromJsonAsync<AckDto>(JsonOptions, ct)
             ?? throw new InvalidOperationException("Empty response");
@@ -139,7 +137,7 @@ public class OpenVipClient : IDisposable
     public async Task<AckDto> ControlAsync(string command, CancellationToken ct = default)
     {
         var body = new { command };
-        var resp = await _http.PostAsJsonAsync("/control", body, JsonOptions, ct);
+        var resp = await _http.PostAsJsonAsync("control", body, JsonOptions, ct);
         resp.EnsureSuccessStatusCode();
         return await resp.Content.ReadFromJsonAsync<AckDto>(JsonOptions, ct)
             ?? throw new InvalidOperationException("Empty response");
@@ -165,7 +163,7 @@ public class OpenVipClient : IDisposable
         TranscriptionDto message,
         CancellationToken ct = default)
     {
-        var resp = await _http.PostAsJsonAsync($"/agents/{agentId}/messages", message, JsonOptions, ct);
+        var resp = await _http.PostAsJsonAsync($"agents/{agentId}/messages", message, JsonOptions, ct);
         resp.EnsureSuccessStatusCode();
         return await resp.Content.ReadFromJsonAsync<AckDto>(JsonOptions, ct)
             ?? throw new InvalidOperationException("Empty response");
@@ -188,7 +186,7 @@ public class OpenVipClient : IDisposable
         SubscribeOptions? options = null,
         CancellationToken ct = default)
     {
-        var url = $"/agents/{agentId}/messages";
+        var url = $"agents/{agentId}/messages";
         return SseStreamAsync<AgentMessageDto>(
             url, options ?? new SubscribeOptions(), ct,
             conflictMessage: $"Agent '{agentId}' is already connected");
@@ -203,7 +201,7 @@ public class OpenVipClient : IDisposable
         CancellationToken ct = default)
     {
         return SseStreamAsync<StatusDto>(
-            "/status/stream", options ?? new SubscribeOptions(), ct);
+            "status/stream", options ?? new SubscribeOptions(), ct);
     }
 
     // --- SSE helper ---

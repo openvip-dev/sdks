@@ -22,7 +22,7 @@ public class OpenVipClientTests
     {
         var json = body != null ? JsonSerializer.Serialize(body, JsonOptions) : "{}";
         var handler = new MockHandler(status, json);
-        return new HttpClient(handler) { BaseAddress = new Uri("http://test:8770") };
+        return new HttpClient(handler) { BaseAddress = new Uri("http://test:8770/openvip/") };
     }
 
     // --- GetStatusAsync ---
@@ -59,7 +59,7 @@ public class OpenVipClientTests
     public async Task IsAvailableAsync_ReturnsFalseOnError()
     {
         var handler = new MockHandler(new HttpRequestException("Connection refused"));
-        var http = new HttpClient(handler) { BaseAddress = new Uri("http://test:8770") };
+        var http = new HttpClient(handler) { BaseAddress = new Uri("http://test:8770/openvip/") };
         using var client = new OpenVipClient(http);
 
         Assert.False(await client.IsAvailableAsync());
@@ -124,7 +124,7 @@ public class OpenVipClientTests
     {
         var sseData = "data: {\"type\":\"transcription\",\"text\":\"hello\"}\n\ndata: {\"type\":\"transcription\",\"text\":\"world\"}\n\n";
         var handler = new MockHandler(HttpStatusCode.OK, sseData, "text/event-stream");
-        var http = new HttpClient(handler) { BaseAddress = new Uri("http://test:8770") };
+        var http = new HttpClient(handler) { BaseAddress = new Uri("http://test:8770/openvip/") };
         using var client = new OpenVipClient(http);
 
         var messages = new List<AgentMessageDto>();
@@ -140,7 +140,7 @@ public class OpenVipClientTests
     public async Task SubscribeAsync_ThrowsDuplicateAgentErrorOn409()
     {
         var handler = new MockHandler(HttpStatusCode.Conflict, "{}");
-        var http = new HttpClient(handler) { BaseAddress = new Uri("http://test:8770") };
+        var http = new HttpClient(handler) { BaseAddress = new Uri("http://test:8770/openvip/") };
         using var client = new OpenVipClient(http);
 
         await Assert.ThrowsAsync<DuplicateAgentError>(async () =>
