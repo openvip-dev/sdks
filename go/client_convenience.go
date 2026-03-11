@@ -105,16 +105,13 @@ func (c *Client) IsAvailable(ctx context.Context) bool {
 
 // Speak requests text-to-speech synthesis.
 func (c *Client) Speak(ctx context.Context, text string, opts *SpeakOptions) (*SpeechResponse, error) {
-	body := map[string]interface{}{
-		"openvip": ProtocolVersion,
-		"type":    "speech",
-		"text":    text,
-	}
+	var lang *string
 	if opts != nil && opts.Language != "" {
-		body["language"] = opts.Language
+		lang = &opts.Language
 	}
+	req := NewSpeechRequestMessage(text, lang)
 	var resp SpeechResponse
-	err := c.post(ctx, "/speech", body, &resp)
+	err := c.post(ctx, "/speech", req, &resp)
 	return &resp, err
 }
 
