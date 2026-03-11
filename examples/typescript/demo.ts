@@ -26,7 +26,11 @@ const client = new Client();
     console.log(`[user ] ${message.text}`);
 
     if (message.text?.trim()) {
-      await client.speak(`You said: ${message.text}`, { language: "en" });
+      try {
+        await client.speak(`You said: ${message.text}`, { language: "en" });
+      } catch {
+        // TTS may not be configured — ignore
+      }
     }
   }
 })();
