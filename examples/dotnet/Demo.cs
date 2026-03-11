@@ -41,3 +41,4 @@ try
 catch (OperationCanceledException) { }
 
 Console.WriteLine("\nStopped.");
+return 0;
