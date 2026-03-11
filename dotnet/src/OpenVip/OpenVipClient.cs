@@ -62,7 +62,7 @@ public class OpenVipClient : IDisposable
     /// </summary>
     /// <param name="url">Base URL of the OpenVIP engine.</param>
     /// <param name="token">Optional Bearer token for authentication.</param>
-    public OpenVipClient(string url = "http://localhost:8770", string? token = null)
+    public OpenVipClient(string url = "http://localhost:8770/openvip", string? token = null)
     {
         _http = new HttpClient { BaseAddress = new Uri(url.TrimEnd('/')) };
         _ownsHttpClient = true;
