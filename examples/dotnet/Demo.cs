@@ -21,13 +21,17 @@ _ = Task.Run(async () =>
 });
 
 // Listen for transcriptions and echo them back via TTS
-await foreach (var message in client.SubscribeAsync(name,
-    new SubscribeOptions { Reconnect = true }, cts.Token))
+try
 {
-    Console.WriteLine($"[user ] {message.Text}");
-
-    if (!string.IsNullOrWhiteSpace(message.Text))
+    await foreach (var message in client.SubscribeAsync(name,
+        new SubscribeOptions { Reconnect = true }, cts.Token))
     {
-        await client.SpeakAsync($"You said: {message.Text}", language: "en", ct: cts.Token);
+        Console.WriteLine($"[user ] {message.Text}");
+
+        if (!string.IsNullOrWhiteSpace(message.Text))
+            await client.SpeakAsync($"You said: {message.Text}", language: "en", ct: cts.Token);
     }
 }
+catch (OperationCanceledException) { }
+
+Console.WriteLine("\nStopped.");
