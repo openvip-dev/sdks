@@ -23,7 +23,7 @@ Example::
         print(status.state, status.connected_agents)
 """
 
-__version__ = "1.0.0"
+__version__ = "1.0.0rc10"
 
 # Convenience API (hand-written)
 from openvip.client import Client as Client
