@@ -39,12 +39,8 @@ class ControlRequest(BaseModel):
             raise ValueError("must be one of enum values ('1.0')")
         return value
 
-    @field_validator('command')
-    def command_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['stt.start', 'stt.stop', 'engine.shutdown']):
-            raise ValueError("must be one of enum values ('stt.start', 'stt.stop', 'engine.shutdown')")
-        return value
+    # No command validation — implementations may define custom commands
+    # Standard commands: stt.start, stt.stop, ping
 
     model_config = ConfigDict(
         validate_by_name=True,
